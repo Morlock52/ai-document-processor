@@ -1,0 +1,20 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/.next",
+  "installCommand": "cd frontend && npm install",
+  "devCommand": "cd frontend && npm run dev",
+  "functions": {
+    "frontend/src/app/api/proxy/[...path].ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@api_url"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_API_URL": "@api_url"
+    }
+  }
+}

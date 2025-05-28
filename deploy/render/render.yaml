@@ -1,0 +1,59 @@
+services:
+  # Backend API
+  - type: web
+    name: document-processor-api
+    runtime: python
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: document-processor-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: document-processor-redis
+          property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PORT
+        value: 8000
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # Frontend
+  - type: web
+    name: document-processor-frontend
+    runtime: node
+    buildCommand: "cd frontend && npm install && npm run build"
+    startCommand: "cd frontend && npm start"
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: document-processor-api
+          property: host
+    healthCheckPath: /
+    autoDeploy: true
+
+  # Background Worker
+  - type: worker
+    name: document-processor-worker
+    runtime: python
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && python -m app.worker"
+    envVars:
+      - fromGroup: document-processor-api
+
+databases:
+  - name: document-processor-db
+    plan: starter
+    databaseName: docprocessor
+    user: docuser
+
+services:
+  - type: redis
+    name: document-processor-redis
+    plan: starter
+    maxmemoryPolicy: allkeys-lru

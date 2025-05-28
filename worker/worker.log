@@ -1,0 +1,81 @@
+2025-05-25 04:29:57,348 - __main__ - INFO - [14:281473098502176] - 🚀 MAIN: Starting document processing worker (PID: 14)
+2025-05-25 04:29:57,348 - __main__ - INFO - [14:281473098502176] - 🚀 WORKER_INIT: Starting enhanced document processing worker
+2025-05-25 04:29:57,348 - __main__ - INFO - [14:281473098502176] - 🔍 WORKER_INIT: Validating environment configuration
+2025-05-25 04:29:57,349 - __main__ - INFO - [14:281473098502176] - 🔍 WORKER_INIT: Environment validated - Redis: redis://redis:6379/0...
+2025-05-25 04:29:57,350 - __main__ - INFO - [14:281473098502176] - 🔗 REDIS_CONNECT: Attempt 1/3 to redis://redis:6379/0...
+2025-05-25 04:29:57,353 - __main__ - INFO - [14:281473098502176] - ✅ REDIS_CONNECTED: Successfully connected to Redis
+2025-05-25 04:29:57,354 - __main__ - INFO - [14:281473098502176] - 🔧 WORKER_INIT: Initializing job queue and worker
+2025-05-25 04:29:57,355 - __main__ - INFO - [14:281473098502176] - 🏥 MONITOR_INIT: Worker health monitoring system initialized
+2025-05-25 04:29:57,355 - __main__ - INFO - [14:281473098502176] - 🏥 MONITOR_START: Health monitoring thread started
+2025-05-25 04:29:57,355 - __main__ - INFO - [14:281473098502176] - 🛡️ SIGNAL_HANDLERS: Registered SIGTERM and SIGINT handlers
+2025-05-25 04:29:57,355 - __main__ - INFO - [14:281473098502176] - 🚀 WORKER_READY: Enhanced worker started successfully in 0.01s
+2025-05-25 04:29:57,356 - __main__ - INFO - [14:281473098502176] - 🔄 WORKER_LOOP: Starting job processing loop
+2025-05-25 04:29:57,357 - rq.worker - INFO - [14:281473098502176] - Worker rq:worker:6fca2a68249c4c0d921e171eeb967a17 started with PID 14, version 1.15.1
+2025-05-25 04:29:57,357 - rq.worker - INFO - [14:281473098502176] - Subscribing to channel rq:pubsub:6fca2a68249c4c0d921e171eeb967a17
+2025-05-25 04:29:57,358 - rq.worker - INFO - [14:281473098502176] - *** Listening on default...
+2025-05-25 04:29:58,360 - __main__ - INFO - [14:281473057878432] - 🏥 HEALTH_CHECK: Uptime=0:00:00.000432, Memory=30.3MB/1024MB, Redis=✅, Worker=✅, Jobs=✅0/❌0, Failures=0/5, LastJob=0.0min, System=healthy
+2025-05-25 04:30:17,378 - rq.worker - ERROR - [14:281473098502176] - Worker rq:worker:6fca2a68249c4c0d921e171eeb967a17: Redis connection timeout, quitting...
+2025-05-25 04:30:17,385 - rq.worker - INFO - [14:281473098502176] - Unsubscribing from channel rq:pubsub:6fca2a68249c4c0d921e171eeb967a17
+2025-05-25 04:30:17,517 - __main__ - INFO - [14:281473098502176] - 🛑 WORKER_SHUTDOWN: Worker process terminating
+2025-05-25 04:30:17,517 - __main__ - INFO - [14:281473098502176] - 🛑 MAIN: Worker process terminated
+2025-05-25 04:32:19,798 - __main__ - INFO - [1:281472995917856] - 🚀 MAIN: Starting document processing worker (PID: 1)
+2025-05-25 04:32:19,799 - __main__ - INFO - [1:281472995917856] - 🚀 WORKER_INIT: Starting enhanced document processing worker
+2025-05-25 04:32:19,799 - __main__ - INFO - [1:281472995917856] - 🔍 WORKER_INIT: Validating environment configuration
+2025-05-25 04:32:19,802 - __main__ - INFO - [1:281472995917856] - 🔍 WORKER_INIT: Environment validated - Redis: redis://redis:6379/0...
+2025-05-25 04:32:19,802 - __main__ - INFO - [1:281472995917856] - 🔗 REDIS_CONNECT: Attempt 1/3 to redis://redis:6379/0...
+2025-05-25 04:32:19,806 - __main__ - INFO - [1:281472995917856] - ✅ REDIS_CONNECTED: Successfully connected to Redis
+2025-05-25 04:32:19,806 - __main__ - INFO - [1:281472995917856] - 🔧 WORKER_INIT: Initializing job queue and worker
+2025-05-25 04:32:19,807 - __main__ - INFO - [1:281472995917856] - 🏥 MONITOR_INIT: Worker health monitoring system initialized
+2025-05-25 04:32:19,807 - __main__ - INFO - [1:281472995917856] - 🏥 MONITOR_START: Health monitoring thread started
+2025-05-25 04:32:19,808 - __main__ - INFO - [1:281472995917856] - 🛡️ SIGNAL_HANDLERS: Registered SIGTERM and SIGINT handlers
+2025-05-25 04:32:19,808 - __main__ - INFO - [1:281472995917856] - 🚀 WORKER_READY: Enhanced worker started successfully in 0.01s
+2025-05-25 04:32:19,808 - __main__ - INFO - [1:281472995917856] - 🔄 WORKER_LOOP: Starting job processing loop
+2025-05-25 04:32:19,809 - rq.worker - INFO - [1:281472995917856] - Worker rq:worker:738ba49d66cb473391e2886953fc3e8d started with PID 1, version 1.15.1
+2025-05-25 04:32:19,810 - rq.worker - INFO - [1:281472995917856] - Subscribing to channel rq:pubsub:738ba49d66cb473391e2886953fc3e8d
+2025-05-25 04:32:19,812 - rq.worker - INFO - [1:281472995917856] - *** Listening on default...
+2025-05-25 04:32:20,814 - __main__ - INFO - [1:281472955117984] - 🏥 HEALTH_CHECK: Uptime=0:00:00.000574, Memory=30.7MB/1024MB, Redis=✅, Worker=✅, Jobs=✅0/❌0, Failures=0/5, LastJob=0.0min, System=healthy
+2025-05-25 04:32:39,831 - rq.worker - ERROR - [1:281472995917856] - Worker rq:worker:738ba49d66cb473391e2886953fc3e8d: Redis connection timeout, quitting...
+2025-05-25 04:32:39,841 - rq.worker - INFO - [1:281472995917856] - Unsubscribing from channel rq:pubsub:738ba49d66cb473391e2886953fc3e8d
+2025-05-25 04:32:39,929 - __main__ - INFO - [1:281472995917856] - 🛑 WORKER_SHUTDOWN: Worker process terminating
+2025-05-25 04:32:39,930 - __main__ - INFO - [1:281472995917856] - 🛑 MAIN: Worker process terminated
+2025-05-25 04:34:48,288 - __main__ - INFO - [1:281473279070240] - 🚀 MAIN: Starting document processing worker (PID: 1)
+2025-05-25 04:34:48,288 - __main__ - INFO - [1:281473279070240] - 🚀 WORKER_INIT: Starting enhanced document processing worker
+2025-05-25 04:34:48,288 - __main__ - INFO - [1:281473279070240] - 🔍 WORKER_INIT: Validating environment configuration
+2025-05-25 04:34:48,289 - __main__ - INFO - [1:281473279070240] - 🔍 WORKER_INIT: Environment validated - Redis: redis://redis:6379/0...
+2025-05-25 04:34:48,289 - __main__ - INFO - [1:281473279070240] - 🔗 REDIS_CONNECT: Attempt 1/3 to redis://redis:6379/0...
+2025-05-25 04:34:48,294 - __main__ - INFO - [1:281473279070240] - ✅ REDIS_CONNECTED: Successfully connected to Redis
+2025-05-25 04:34:48,294 - __main__ - INFO - [1:281473279070240] - 🔧 WORKER_INIT: Initializing job queue and worker
+2025-05-25 04:34:48,295 - __main__ - INFO - [1:281473279070240] - 🏥 MONITOR_INIT: Worker health monitoring system initialized
+2025-05-25 04:34:48,295 - __main__ - INFO - [1:281473279070240] - 🏥 MONITOR_START: Health monitoring thread started
+2025-05-25 04:34:48,295 - __main__ - INFO - [1:281473279070240] - 🛡️ SIGNAL_HANDLERS: Registered SIGTERM and SIGINT handlers
+2025-05-25 04:34:48,296 - __main__ - INFO - [1:281473279070240] - 🚀 WORKER_READY: Enhanced worker started successfully in 0.01s
+2025-05-25 04:34:48,296 - __main__ - INFO - [1:281473279070240] - 🔄 WORKER_LOOP: Starting job processing loop
+2025-05-25 04:34:48,298 - rq.worker - INFO - [1:281473279070240] - Worker rq:worker:c1057cce490c4c35881e189d18e25639 started with PID 1, version 1.15.1
+2025-05-25 04:34:48,298 - rq.worker - INFO - [1:281473279070240] - Subscribing to channel rq:pubsub:c1057cce490c4c35881e189d18e25639
+2025-05-25 04:34:48,300 - rq.worker - INFO - [1:281473279070240] - *** Listening on default...
+2025-05-25 04:34:49,305 - __main__ - INFO - [1:281473238233504] - 🏥 HEALTH_CHECK: Uptime=0:00:00.000504, Memory=30.3MB/1024MB, Redis=✅, Worker=✅, Jobs=✅0/❌0, Failures=0/5, LastJob=0.0min, System=healthy
+2025-05-25 04:35:08,330 - rq.worker - ERROR - [1:281473279070240] - Worker rq:worker:c1057cce490c4c35881e189d18e25639: Redis connection timeout, quitting...
+2025-05-25 04:35:08,337 - rq.worker - INFO - [1:281473279070240] - Unsubscribing from channel rq:pubsub:c1057cce490c4c35881e189d18e25639
+2025-05-25 04:35:08,425 - __main__ - INFO - [1:281473279070240] - 🛑 WORKER_SHUTDOWN: Worker process terminating
+2025-05-25 04:35:08,426 - __main__ - INFO - [1:281473279070240] - 🛑 MAIN: Worker process terminated
+2025-05-25 08:21:08,220 - __main__ - INFO - [1:281472978559008] - 🚀 MAIN: Starting document processing worker (PID: 1)
+2025-05-25 08:21:08,221 - __main__ - INFO - [1:281472978559008] - 🚀 WORKER_INIT: Starting enhanced document processing worker
+2025-05-25 08:21:08,221 - __main__ - INFO - [1:281472978559008] - 🔍 WORKER_INIT: Validating environment configuration
+2025-05-25 08:21:08,222 - __main__ - INFO - [1:281472978559008] - 🔍 WORKER_INIT: Environment validated - Redis: redis://redis:6379/0...
+2025-05-25 08:21:08,223 - __main__ - INFO - [1:281472978559008] - 🔗 REDIS_CONNECT: Attempt 1/3 to redis://redis:6379/0...
+2025-05-25 08:21:08,242 - __main__ - INFO - [1:281472978559008] - ✅ REDIS_CONNECTED: Successfully connected to Redis
+2025-05-25 08:21:08,242 - __main__ - INFO - [1:281472978559008] - 🔧 WORKER_INIT: Initializing job queue and worker
+2025-05-25 08:21:08,243 - __main__ - INFO - [1:281472978559008] - 🏥 MONITOR_INIT: Worker health monitoring system initialized
+2025-05-25 08:21:08,244 - __main__ - INFO - [1:281472978559008] - 🏥 MONITOR_START: Health monitoring thread started
+2025-05-25 08:21:08,244 - __main__ - INFO - [1:281472978559008] - 🛡️ SIGNAL_HANDLERS: Registered SIGTERM and SIGINT handlers
+2025-05-25 08:21:08,245 - __main__ - INFO - [1:281472978559008] - 🚀 WORKER_READY: Enhanced worker started successfully in 0.02s
+2025-05-25 08:21:08,245 - __main__ - INFO - [1:281472978559008] - 🔄 WORKER_LOOP: Starting job processing loop
+2025-05-25 08:21:08,253 - rq.worker - INFO - [1:281472978559008] - Worker rq:worker:4d0dba950b854aa6a975e8a003b3b56b started with PID 1, version 1.15.1
+2025-05-25 08:21:08,255 - rq.worker - INFO - [1:281472978559008] - Subscribing to channel rq:pubsub:4d0dba950b854aa6a975e8a003b3b56b
+2025-05-25 08:21:08,259 - rq.worker - INFO - [1:281472978559008] - *** Listening on default...
+2025-05-25 08:21:08,262 - rq.worker - INFO - [1:281472978559008] - Cleaning registries for queue: default
+2025-05-25 08:21:09,248 - __main__ - INFO - [1:281472938340768] - 🏥 HEALTH_CHECK: Uptime=0:00:00.000304, Memory=30.7MB/1024MB, Redis=✅, Worker=✅, Jobs=✅0/❌0, Failures=0/5, LastJob=0.0min, System=healthy
+2025-05-25 08:21:28,308 - rq.worker - ERROR - [1:281472978559008] - Worker rq:worker:4d0dba950b854aa6a975e8a003b3b56b: Redis connection timeout, quitting...
+2025-05-25 08:21:28,314 - rq.worker - INFO - [1:281472978559008] - Unsubscribing from channel rq:pubsub:4d0dba950b854aa6a975e8a003b3b56b
+2025-05-25 08:21:28,422 - __main__ - INFO - [1:281472978559008] - 🛑 WORKER_SHUTDOWN: Worker process terminating
+2025-05-25 08:21:28,423 - __main__ - INFO - [1:281472978559008] - 🛑 MAIN: Worker process terminated
