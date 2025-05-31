@@ -103,6 +103,12 @@ The script will display your unique URLs:
 ```
 
 That's it! Start uploading PDFs and watch the magic happen ✨
+### 🌟 One-Line Installer
+
+If you prefer an automated setup, run:
+```bash
+./installer.sh
+```
 
 ## 🏗️ Architecture
 
