@@ -7,6 +7,7 @@ import threading
 import traceback
 import gc
 from pathlib import Path
+from urllib.parse import urlparse
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 
@@ -19,6 +20,7 @@ except ImportError:
     psutil = None
 
 from redis import Redis, ConnectionError as RedisConnectionError
+from redis.exceptions import TimeoutError as RedisTimeoutError
 from rq import Worker, Queue, Connection
 from dotenv import load_dotenv
 
@@ -40,8 +42,9 @@ logger = logging.getLogger(__name__)
 HEALTH_CHECK_INTERVAL = 30  # seconds
 MAX_MEMORY_MB = 1024  # 1GB memory limit
 MAX_CONSECUTIVE_FAILURES = 5
-REDIS_RECONNECT_ATTEMPTS = 3
-REDIS_RECONNECT_DELAY = 5  # seconds
+# Allow configuration of reconnect behavior via environment variables
+REDIS_RECONNECT_ATTEMPTS = int(os.getenv("REDIS_RECONNECT_ATTEMPTS", "3"))
+REDIS_RECONNECT_DELAY = int(os.getenv("REDIS_RECONNECT_DELAY", "5"))  # seconds
 
 class WorkerHealthMonitor:
     """
@@ -163,6 +166,9 @@ class WorkerHealthMonitor:
             self.redis_conn.ping()
             return True
 
+        except RedisTimeoutError as e:
+            logger.error(f"❌ REDIS_TIMEOUT: {e}")
+            return self._attempt_redis_reconnection()
         except RedisConnectionError as e:
             logger.error(f"❌ REDIS_DISCONNECTED: {e}")
             return self._attempt_redis_reconnection()
@@ -172,13 +178,23 @@ class WorkerHealthMonitor:
 
     def _attempt_redis_reconnection(self) -> bool:
         """Attempt to reconnect to Redis with exponential backoff"""
+        redis_url = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+        parsed = urlparse(redis_url)
+        host = parsed.hostname or 'unknown'
+        port = parsed.port or 6379
+
         for attempt in range(1, REDIS_RECONNECT_ATTEMPTS + 1):
             try:
-                logger.info(f"🔄 REDIS_RECONNECT: Attempt {attempt}/{REDIS_RECONNECT_ATTEMPTS}")
+                logger.info(
+                    f"🔄 REDIS_RECONNECT: Attempt {attempt}/{REDIS_RECONNECT_ATTEMPTS} to {host}:{port}"
+                )
 
                 # Create new connection
-                redis_url = os.getenv('REDIS_URL', 'redis://redis:6379/0')
-                new_conn = Redis.from_url(redis_url, socket_timeout=10, socket_connect_timeout=10)
+                new_conn = Redis.from_url(
+                    redis_url,
+                    socket_timeout=10,
+                    socket_connect_timeout=10,
+                )
                 new_conn.ping()
 
                 # Update connection
@@ -186,9 +202,17 @@ class WorkerHealthMonitor:
                 logger.info("✅ REDIS_RECONNECTED: Successfully reconnected to Redis")
                 return True
 
+            except RedisTimeoutError as e:
+                wait_time = REDIS_RECONNECT_DELAY * (2 ** (attempt - 1))
+                logger.error(
+                    f"❌ REDIS_TIMEOUT: {e}. Attempt {attempt} waiting {wait_time}s before retry"
+                )
+                time.sleep(wait_time)
             except Exception as e:
                 wait_time = REDIS_RECONNECT_DELAY * (2 ** (attempt - 1))
-                logger.error(f"❌ REDIS_RECONNECT_FAILED: Attempt {attempt} failed: {e}, waiting {wait_time}s")
+                logger.error(
+                    f"❌ REDIS_RECONNECT_FAILED: Attempt {attempt} error: {e}, waiting {wait_time}s"
+                )
                 time.sleep(wait_time)
 
         logger.error("🚨 REDIS_RECONNECT_EXHAUSTED: All reconnection attempts failed")
@@ -489,10 +513,15 @@ def start_worker():
     # Initialize Redis connection with retry logic
     redis_url = env_validation["redis_url"]
     redis_conn = None
+    parsed = urlparse(redis_url)
+    host = parsed.hostname or 'unknown'
+    port = parsed.port or 6379
 
     for attempt in range(1, REDIS_RECONNECT_ATTEMPTS + 1):
         try:
-            logger.info(f"🔗 REDIS_CONNECT: Attempt {attempt}/{REDIS_RECONNECT_ATTEMPTS} to {redis_url[:30]}...")
+            logger.info(
+                f"🔗 REDIS_CONNECT: Attempt {attempt}/{REDIS_RECONNECT_ATTEMPTS} to {host}:{port}"
+            )
 
             redis_conn = Redis.from_url(
                 redis_url,
@@ -507,9 +536,23 @@ def start_worker():
             logger.info("✅ REDIS_CONNECTED: Successfully connected to Redis")
             break
 
+        except RedisTimeoutError as e:
+            wait_time = REDIS_RECONNECT_DELAY * (2 ** (attempt - 1))
+            logger.error(
+                f"❌ REDIS_CONNECT_TIMEOUT: {e}. Waiting {wait_time}s before retry"
+            )
+
+            if attempt < REDIS_RECONNECT_ATTEMPTS:
+                logger.info(f"🔄 REDIS_RETRY: Waiting {wait_time}s before retry")
+                time.sleep(wait_time)
+            else:
+                logger.error("🚨 REDIS_CONNECT_EXHAUSTED: All connection attempts failed")
+                raise
         except Exception as e:
             wait_time = REDIS_RECONNECT_DELAY * (2 ** (attempt - 1))
-            logger.error(f"❌ REDIS_CONNECT_FAILED: Attempt {attempt} failed: {e}")
+            logger.error(
+                f"❌ REDIS_CONNECT_FAILED: Attempt {attempt} error: {e}, waiting {wait_time}s"
+            )
 
             if attempt < REDIS_RECONNECT_ATTEMPTS:
                 logger.info(f"🔄 REDIS_RETRY: Waiting {wait_time}s before retry")
