@@ -108,7 +108,7 @@ OPENAI_API_KEY=sk-your-openai-api-key-here
 DATABASE_URL=postgresql://docuser:docpass@postgres:5432/docprocessor
 
 # Redis Queue (auto-configured)
-REDIS_URL=redis://redis:6379/0
+REDIS_URL=redis://localhost:6379/0
 
 # Optional - AWS S3 Storage
 AWS_ACCESS_KEY_ID=your-access-key

@@ -67,8 +67,15 @@ echo "Starting backend server on port $BACKEND_PORT..."
 python start.py &
 BACKEND_PID=$!
 
+# Step 6b: Start worker process
+cd ../worker
+echo "Starting background worker..."
+python worker.py &
+WORKER_PID=$!
+cd ..
+
 # Step 7: Install frontend dependencies
-cd ../frontend
+cd frontend
 
 if [ ! -d "node_modules" ]; then
     echo ""
@@ -116,6 +123,7 @@ cleanup() {
     echo "Shutting down services..."
     kill $BACKEND_PID 2>/dev/null
     kill $FRONTEND_PID 2>/dev/null
+    kill $WORKER_PID 2>/dev/null
     echo "Services stopped."
     exit 0
 }
