@@ -12,7 +12,7 @@ from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 
 # Add the backend directory to the Python path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'backend'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 
 try:
     import psutil
@@ -24,17 +24,20 @@ from redis.exceptions import TimeoutError as RedisTimeoutError
 from rq import Worker, Queue, Connection
 from dotenv import load_dotenv
 
+# Default Redis connection for local development
+DEFAULT_REDIS_URL = "redis://localhost:6379/0"
+
 # Load environment variables from .env file
 load_dotenv()
 
 # Enhanced logging configuration with detailed formatting
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - [%(process)d:%(thread)d] - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - [%(process)d:%(thread)d] - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler('worker.log', mode='a')
-    ]
+        logging.FileHandler("worker.log", mode="a"),
+    ],
 )
 logger = logging.getLogger(__name__)
 
@@ -45,6 +48,7 @@ MAX_CONSECUTIVE_FAILURES = 5
 # Allow configuration of reconnect behavior via environment variables
 REDIS_RECONNECT_ATTEMPTS = int(os.getenv("REDIS_RECONNECT_ATTEMPTS", "3"))
 REDIS_RECONNECT_DELAY = int(os.getenv("REDIS_RECONNECT_DELAY", "5"))  # seconds
+
 
 class WorkerHealthMonitor:
     """
@@ -126,7 +130,9 @@ class WorkerHealthMonitor:
         )
 
         # Self-healing actions
-        self._perform_self_healing(memory_usage, redis_healthy, worker_status, job_health, system_health)
+        self._perform_self_healing(
+            memory_usage, redis_healthy, worker_status, job_health, system_health
+        )
 
     def _check_memory_usage(self) -> Dict[str, Any]:
         """Check and manage memory usage with automatic cleanup"""
@@ -142,16 +148,20 @@ class WorkerHealthMonitor:
                 "usage_mb": memory_mb,
                 "limit_mb": MAX_MEMORY_MB,
                 "healthy": memory_mb < MAX_MEMORY_MB,
-                "percent": (memory_mb / MAX_MEMORY_MB) * 100
+                "percent": (memory_mb / MAX_MEMORY_MB) * 100,
             }
 
             # Memory cleanup if approaching limit
             if memory_mb > MAX_MEMORY_MB * 0.8:
-                logger.warning(f"⚠️ MEMORY_HIGH: {memory_mb:.1f}MB (80% of limit), triggering cleanup")
+                logger.warning(
+                    f"⚠️ MEMORY_HIGH: {memory_mb:.1f}MB (80% of limit), triggering cleanup"
+                )
                 gc.collect()
 
             if memory_mb > MAX_MEMORY_MB:
-                logger.error(f"🚨 MEMORY_CRITICAL: {memory_mb:.1f}MB exceeds limit of {MAX_MEMORY_MB}MB")
+                logger.error(
+                    f"🚨 MEMORY_CRITICAL: {memory_mb:.1f}MB exceeds limit of {MAX_MEMORY_MB}MB"
+                )
 
             return result
 
@@ -178,9 +188,9 @@ class WorkerHealthMonitor:
 
     def _attempt_redis_reconnection(self) -> bool:
         """Attempt to reconnect to Redis with exponential backoff"""
-        redis_url = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+        redis_url = os.getenv("REDIS_URL", DEFAULT_REDIS_URL)
         parsed = urlparse(redis_url)
-        host = parsed.hostname or 'unknown'
+        host = parsed.hostname or "unknown"
         port = parsed.port or 6379
 
         for attempt in range(1, REDIS_RECONNECT_ATTEMPTS + 1):
@@ -222,37 +232,48 @@ class WorkerHealthMonitor:
         """Check worker status and health"""
         try:
             # Check if worker is still alive and responsive
-            worker_state = getattr(self.worker, 'state', 'unknown')
-            is_busy = getattr(self.worker, 'get_current_job', lambda: None)() is not None
+            worker_state = getattr(self.worker, "state", "unknown")
+            is_busy = (
+                getattr(self.worker, "get_current_job", lambda: None)() is not None
+            )
 
             return {
                 "healthy": True,
                 "state": worker_state,
                 "busy": is_busy,
-                "pid": os.getpid()
+                "pid": os.getpid(),
             }
 
         except Exception as e:
             logger.error(f"❌ WORKER_STATUS_CHECK_FAILED: {e}")
-            return {"healthy": False, "state": "error", "busy": False, "pid": os.getpid()}
+            return {
+                "healthy": False,
+                "state": "error",
+                "busy": False,
+                "pid": os.getpid(),
+            }
 
     def _check_job_processing_health(self, current_time: datetime) -> Dict[str, Any]:
         """Check job processing patterns and detect stalls"""
-        last_job_ago = (current_time - self.last_successful_job).total_seconds() / 60  # minutes
+        last_job_ago = (
+            current_time - self.last_successful_job
+        ).total_seconds() / 60  # minutes
 
         # Check for job processing stalls
         job_stalled = last_job_ago > 60  # No successful job in 1 hour
 
         # Calculate success rate
         total_jobs = self.total_jobs_processed + self.total_jobs_failed
-        success_rate = (self.total_jobs_processed / total_jobs * 100) if total_jobs > 0 else 100
+        success_rate = (
+            (self.total_jobs_processed / total_jobs * 100) if total_jobs > 0 else 100
+        )
 
         return {
             "last_job_ago": last_job_ago,
             "stalled": job_stalled,
             "success_rate": success_rate,
             "total_processed": self.total_jobs_processed,
-            "total_failed": self.total_jobs_failed
+            "total_failed": self.total_jobs_failed,
         }
 
     def _check_system_resources(self) -> Dict[str, Any]:
@@ -288,15 +309,21 @@ class WorkerHealthMonitor:
                 "cpu_percent": cpu_percent,
                 "disk_free_gb": disk_free_gb,
                 "load_1min": load_1min,
-                "details": f"CPU:{cpu_percent:.1f}% Disk:{disk_free_gb:.1f}GB Load:{load_1min:.1f}"
+                "details": f"CPU:{cpu_percent:.1f}% Disk:{disk_free_gb:.1f}GB Load:{load_1min:.1f}",
             }
 
         except Exception as e:
             logger.error(f"❌ SYSTEM_CHECK_FAILED: {e}")
             return {"status": "error", "details": str(e)}
 
-    def _perform_self_healing(self, memory_usage: Dict, redis_healthy: bool,
-                             worker_status: Dict, job_health: Dict, system_health: Dict):
+    def _perform_self_healing(
+        self,
+        memory_usage: Dict,
+        redis_healthy: bool,
+        worker_status: Dict,
+        job_health: Dict,
+        system_health: Dict,
+    ):
         """
         🔄 Perform self-healing actions based on health check results
         Implements automatic recovery for common failure scenarios
@@ -305,18 +332,24 @@ class WorkerHealthMonitor:
 
         # Memory-based healing
         if not memory_usage["healthy"]:
-            logger.warning("🔄 SELF_HEAL: Memory limit exceeded, forcing garbage collection")
+            logger.warning(
+                "🔄 SELF_HEAL: Memory limit exceeded, forcing garbage collection"
+            )
             gc.collect()
             healing_actions.append("memory_cleanup")
 
         # Redis connectivity healing
         if not redis_healthy:
-            logger.warning("🔄 SELF_HEAL: Redis connection lost, worker may need restart")
+            logger.warning(
+                "🔄 SELF_HEAL: Redis connection lost, worker may need restart"
+            )
             healing_actions.append("redis_reconnect_attempted")
 
         # Job processing stall healing
         if job_health["stalled"]:
-            logger.warning(f"🔄 SELF_HEAL: Job processing stalled ({job_health['last_job_ago']:.1f}min)")
+            logger.warning(
+                f"🔄 SELF_HEAL: Job processing stalled ({job_health['last_job_ago']:.1f}min)"
+            )
             # Could implement job queue cleanup here
             healing_actions.append("job_stall_detected")
 
@@ -365,8 +398,9 @@ class WorkerHealthMonitor:
             "memory_usage": self._check_memory_usage(),
             "redis_healthy": self._check_redis_connectivity(),
             "worker_status": self._check_worker_status(),
-            "system_health": self._check_system_resources()
+            "system_health": self._check_system_resources(),
         }
+
 
 class EnhancedWorker(Worker):
     """
@@ -389,7 +423,7 @@ class EnhancedWorker(Worker):
         Wraps the original perform_job with comprehensive logging and error recovery
         """
         job_id = job.id if job else "unknown"
-        job_func = getattr(job, 'func_name', 'unknown') if job else "unknown"
+        job_func = getattr(job, "func_name", "unknown") if job else "unknown"
 
         logger.info(f"🚀 JOB_START: ID={job_id}, Function={job_func}")
 
@@ -411,7 +445,9 @@ class EnhancedWorker(Worker):
         except Exception as e:
             # Record failure metrics
             execution_time = time.time() - start_time
-            logger.error(f"❌ JOB_FAILED: ID={job_id}, Time={execution_time:.2f}s, Error={e}")
+            logger.error(
+                f"❌ JOB_FAILED: ID={job_id}, Time={execution_time:.2f}s, Error={e}"
+            )
             logger.error(f"🔍 JOB_ERROR_TRACE: {traceback.format_exc()}")
 
             if self.health_monitor:
@@ -432,14 +468,18 @@ class EnhancedWorker(Worker):
 
         logger.info("🛑 WORKER_SHUTDOWN: Cleanup completed")
 
+
 def setup_signal_handlers(worker: EnhancedWorker):
     """
     🛡️ Setup signal handlers for graceful shutdown
     Ensures proper cleanup when worker receives termination signals
     """
+
     def signal_handler(signum, frame):
         signal_name = signal.Signals(signum).name
-        logger.info(f"🛑 SIGNAL_RECEIVED: {signal_name} ({signum}), initiating graceful shutdown")
+        logger.info(
+            f"🛑 SIGNAL_RECEIVED: {signal_name} ({signum}), initiating graceful shutdown"
+        )
 
         # Set worker to stop accepting new jobs
         worker.should_run_maintenance_tasks = False
@@ -456,22 +496,23 @@ def setup_signal_handlers(worker: EnhancedWorker):
 
     logger.info("🛡️ SIGNAL_HANDLERS: Registered SIGTERM and SIGINT handlers")
 
+
 def validate_environment() -> Dict[str, Any]:
     """
     🔍 Validate environment configuration and dependencies
     Checks required environment variables and system dependencies
     """
     validation_results = {
-        "redis_url": os.getenv('REDIS_URL', 'redis://redis:6379/0'),
+        "redis_url": os.getenv("REDIS_URL", DEFAULT_REDIS_URL),
         "python_version": sys.version,
         "worker_directory": str(Path(__file__).parent),
         "psutil_available": psutil is not None,
-        "issues": []
+        "issues": [],
     }
 
     # Check Redis URL format
     redis_url = validation_results["redis_url"]
-    if not redis_url.startswith(('redis://', 'rediss://')):
+    if not redis_url.startswith(("redis://", "rediss://")):
         validation_results["issues"].append(f"Invalid Redis URL format: {redis_url}")
 
     # Check Python version (should be 3.7+)
@@ -488,9 +529,12 @@ def validate_environment() -> Dict[str, Any]:
 
     # Check if psutil is available for system monitoring
     if not psutil:
-        validation_results["issues"].append("psutil not available - system monitoring limited")
+        validation_results["issues"].append(
+            "psutil not available - system monitoring limited"
+        )
 
     return validation_results
+
 
 def start_worker():
     """
@@ -505,16 +549,20 @@ def start_worker():
     env_validation = validate_environment()
 
     if env_validation["issues"]:
-        logger.warning(f"⚠️ WORKER_INIT: Environment issues detected: {env_validation['issues']}")
+        logger.warning(
+            f"⚠️ WORKER_INIT: Environment issues detected: {env_validation['issues']}"
+        )
         # Continue anyway but log the issues
 
-    logger.info(f"🔍 WORKER_INIT: Environment validated - Redis: {env_validation['redis_url'][:20]}...")
+    logger.info(
+        f"🔍 WORKER_INIT: Environment validated - Redis: {env_validation['redis_url'][:20]}..."
+    )
 
     # Initialize Redis connection with retry logic
     redis_url = env_validation["redis_url"]
     redis_conn = None
     parsed = urlparse(redis_url)
-    host = parsed.hostname or 'unknown'
+    host = parsed.hostname or "unknown"
     port = parsed.port or 6379
 
     for attempt in range(1, REDIS_RECONNECT_ATTEMPTS + 1):
@@ -528,7 +576,7 @@ def start_worker():
                 socket_timeout=10,
                 socket_connect_timeout=10,
                 retry_on_timeout=True,
-                health_check_interval=30
+                health_check_interval=30,
             )
 
             # Test connection
@@ -546,7 +594,9 @@ def start_worker():
                 logger.info(f"🔄 REDIS_RETRY: Waiting {wait_time}s before retry")
                 time.sleep(wait_time)
             else:
-                logger.error("🚨 REDIS_CONNECT_EXHAUSTED: All connection attempts failed")
+                logger.error(
+                    "🚨 REDIS_CONNECT_EXHAUSTED: All connection attempts failed"
+                )
                 raise
         except Exception as e:
             wait_time = REDIS_RECONNECT_DELAY * (2 ** (attempt - 1))
@@ -558,14 +608,16 @@ def start_worker():
                 logger.info(f"🔄 REDIS_RETRY: Waiting {wait_time}s before retry")
                 time.sleep(wait_time)
             else:
-                logger.error("🚨 REDIS_CONNECT_EXHAUSTED: All connection attempts failed")
+                logger.error(
+                    "🚨 REDIS_CONNECT_EXHAUSTED: All connection attempts failed"
+                )
                 raise
 
     # Initialize queue and worker
     try:
         logger.info("🔧 WORKER_INIT: Initializing job queue and worker")
 
-        queue = Queue('default', connection=redis_conn)
+        queue = Queue("default", connection=redis_conn)
         worker = EnhancedWorker([queue], connection=redis_conn)
 
         # Setup health monitoring
@@ -583,7 +635,7 @@ def start_worker():
         # Start the worker event loop
         logger.info("🔄 WORKER_LOOP: Starting job processing loop")
         with Connection(redis_conn):
-            worker.work(logging_level='INFO')
+            worker.work(logging_level="INFO")
 
     except KeyboardInterrupt:
         logger.info("🛑 WORKER_INTERRUPTED: Received keyboard interrupt")
@@ -592,14 +644,15 @@ def start_worker():
         logger.error(f"🚨 WORKER_ERROR: Fatal error in worker: {e}")
         logger.error(f"🔍 WORKER_TRACE: {traceback.format_exc()}")
 
-        if worker and hasattr(worker, 'cleanup'):
+        if worker and hasattr(worker, "cleanup"):
             worker.cleanup()
 
         raise
     finally:
         logger.info("🛑 WORKER_SHUTDOWN: Worker process terminating")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     """
     📋 Main entry point with comprehensive error handling
     Handles all startup failures and ensures proper logging
@@ -608,11 +661,14 @@ if __name__ == '__main__':
         # Set process title for easier identification
         try:
             import setproctitle
-            setproctitle.setproctitle('document-processor-worker')
+
+            setproctitle.setproctitle("document-processor-worker")
         except ImportError:
             pass  # setproctitle is optional
 
-        logger.info(f"🚀 MAIN: Starting document processing worker (PID: {os.getpid()})")
+        logger.info(
+            f"🚀 MAIN: Starting document processing worker (PID: {os.getpid()})"
+        )
         start_worker()
 
     except KeyboardInterrupt:
