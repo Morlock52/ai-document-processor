@@ -1,6 +1,7 @@
 import os
 import logging
 import sys
+import socket
 import time
 import signal
 import threading
@@ -573,10 +574,16 @@ def start_worker():
 
             redis_conn = Redis.from_url(
                 redis_url,
-                socket_timeout=10,
-                socket_connect_timeout=10,
+                socket_timeout=20,  # Increased timeout slightly
+                socket_connect_timeout=20, # Increased timeout slightly
+                socket_keepalive=True,
+                socket_keepalive_options={
+                    (socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 60), # Seconds before sending keepalive probes
+                    (socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 30),# Seconds between keepalive probes
+                    (socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)    # Number of failed probes before dropping
+                },
                 retry_on_timeout=True,
-                health_check_interval=30,
+                health_check_interval=30, # RQ's own health check for the connection
             )
 
             # Test connection

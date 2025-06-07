@@ -33,4 +33,4 @@ ENV PYTHONPATH=/app
 WORKDIR /app/worker
 
 # Command to run the worker
-CMD ["rq", "worker", "--url", "redis://redis:6379/0", "--path", "/app"]
+CMD ["python", "worker.py"]
