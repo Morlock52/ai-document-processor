@@ -43,6 +43,8 @@
 - **Charts & analytics** included
 - **Batch export** multiple docs
 - **Metadata sheets** with insights
+- **Results stored** in PostgreSQL for re-export
+- **Columns** mapped from stored JSON keys
 
 </td>
 <td width="33%" valign="top">

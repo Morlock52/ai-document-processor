@@ -62,6 +62,8 @@ The AI Document Processor is a modern web application that automatically extract
 - **Batch export** for processing multiple documents
 - **Template Mode** - Consolidate all documents into columns/rows format
 - **Custom templates** for different document types
+- **Results stored** in PostgreSQL for re-export
+- **Columns mapped** from stored JSON keys
 
 ### 🎨 Modern Interface
 - **Dark/Light themes** with system preference detection
