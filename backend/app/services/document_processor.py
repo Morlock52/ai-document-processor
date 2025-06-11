@@ -5,7 +5,7 @@ import traceback
 import os
 import psutil
 import asyncio
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
 from pathlib import Path
 import json
 import gc
@@ -92,7 +92,10 @@ class DocumentProcessor:
         logger.info(f"⚙️  PROCESSOR_CONFIG: {self.config}")
 
     async def process_pdf(
-        self, pdf_path: str, schema: Optional[Dict] = None
+        self,
+        pdf_path: str,
+        schema: Optional[Dict] = None,
+        progress_callback: Optional[Callable[[float], None]] = None,
     ) -> Dict[str, Any]:
         """
         Process a PDF document with comprehensive error handling and monitoring
@@ -190,6 +193,15 @@ class DocumentProcessor:
 
                 # Brief pause between chunks to prevent overwhelming the API
                 await asyncio.sleep(0.5)
+
+                # Update progress after each chunk if callback provided
+                if progress_callback:
+                    processed_pages = min(chunk_end, page_count)
+                    progress = processed_pages / page_count
+                    try:
+                        progress_callback(progress)
+                    except Exception as cb_err:
+                        logger.warning(f"Progress callback failed: {cb_err}")
 
             # Log chunk processing summary
             successful_chunks = len(extracted_data) if extracted_data else 0
