@@ -1,6 +1,6 @@
 from typing import List, Union
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl, validator
+from pydantic import AnyHttpUrl
 import os
 
 
@@ -33,7 +33,10 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        f"postgresql://docuser:docpass@localhost:{os.getenv('POSTGRES_PORT', '5432')}/docprocessor",
+        (
+            "postgresql://docuser:docpass@localhost:"
+            f"{os.getenv('POSTGRES_PORT', '5432')}/docprocessor"
+        ),
     )
 
     # Redis
