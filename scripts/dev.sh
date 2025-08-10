@@ -35,6 +35,9 @@ if [ -f .env.ports ]; then
     export $(cat .env.ports | grep -v '^#' | xargs)
 fi
 
+# Step 3b: Set dev mode
+export USE_SQLITE=true
+
 # Step 4: Check if .env exists
 if [ ! -f .env ]; then
     echo ""
@@ -67,15 +70,20 @@ echo "Starting backend server on port $BACKEND_PORT..."
 python start.py &
 BACKEND_PID=$!
 
-# Step 6b: Start worker process
-cd ../worker
-echo "Starting background worker..."
-python worker.py &
-WORKER_PID=$!
-cd ..
+# Step 6b: Start worker process (only if not in SQLite mode)
+if [ "$USE_SQLITE" != "true" ]; then
+    cd ../worker
+    echo "Starting background worker..."
+    python worker.py &
+    WORKER_PID=$!
+    cd ..
+else
+    echo "Skipping worker process in SQLite mode"
+    WORKER_PID=
+fi
 
 # Step 7: Install frontend dependencies
-cd frontend
+cd ../frontend
 
 if [ ! -d "node_modules" ]; then
     echo ""
@@ -123,7 +131,9 @@ cleanup() {
     echo "Shutting down services..."
     kill $BACKEND_PID 2>/dev/null
     kill $FRONTEND_PID 2>/dev/null
-    kill $WORKER_PID 2>/dev/null
+    if [ -n "$WORKER_PID" ]; then
+        kill $WORKER_PID 2>/dev/null
+    fi
     echo "Services stopped."
     exit 0
 }

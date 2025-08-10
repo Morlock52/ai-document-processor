@@ -19,7 +19,7 @@
 </div>
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/hero-screenshot.png" alt="AI Document Processor Screenshot" width="800">
+  <img src="https://raw.githubusercontent.com/your-github-username/ai-document-processor/main/docs/images/hero-screenshot.png" alt="AI Document Processor Screenshot" width="800">
 </div>
 
 ## ✨ Features
@@ -68,17 +68,19 @@ Perfect for automating data extraction from:
 - 📑 **Reports** - Extract tables and structured data
 - 📃 **Any PDF** - Works with scanned or native PDFs
 
-## 🚀 Quick Start
+## 🚀 Quick Start (No Docker)
+
+Get up and running in minutes with our simple, self-contained setup. No external dependencies required!
 
 ### Prerequisites
-- Docker & Docker Compose
+- Python 3.11+
+- Node.js 18+
 - OpenAI API key with GPT-4o access
-- 5 minutes of your time ⏱️
 
 ### 1️⃣ Clone & Configure
 
 ```bash
-git clone https://github.com/yourusername/ai-document-processor.git
+git clone https://github.com/your-github-username/ai-document-processor.git
 cd ai-document-processor
 
 # Copy environment template
@@ -88,11 +90,11 @@ cp .env.example .env
 # OPENAI_API_KEY=sk-your-key-here
 ```
 
-### 2️⃣ Launch with Auto Port Detection
+### 2️⃣ Launch the App
 
 ```bash
-# Our smart launcher finds available ports automatically! 🎉
-./scripts/start.sh
+# This script sets up a self-contained environment with SQLite
+./scripts/dev.sh
 ```
 
 ### 3️⃣ Open Your Browser
@@ -105,11 +107,24 @@ The script will display your unique URLs:
 ```
 
 That's it! Start uploading PDFs and watch the magic happen ✨
-### 🌟 One-Line Installer
 
-If you prefer an automated setup, run:
+## 🐳 Docker-Based Setup (Production-like)
+
+For a full, production-like environment with PostgreSQL and Redis, use our Docker setup.
+
+### Prerequisites
+- Docker & Docker Compose
+- OpenAI API key with GPT-4o access
+
+### 1️⃣ Clone & Configure
+
+(Same as above)
+
+### 2️⃣ Launch with Docker
+
 ```bash
-./installer.sh
+# This script builds and starts the full application stack
+./start-local.sh
 ```
 
 ## 🏗️ Architecture
@@ -133,24 +148,24 @@ graph TD
 <table>
 <tr>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/upload.png" width="400">
+<img src="https://raw.githubusercontent.com/your-github-username/ai-document-processor/main/docs/images/upload.png" width="400">
 <br>
 <em>Drag & Drop Upload</em>
 </td>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/processing.png" width="400">
+<img src="https://raw.githubusercontent.com/your-github-username/ai-document-processor/main/docs/images/processing.png" width="400">
 <br>
 <em>Real-time Processing</em>
 </td>
 </tr>
 <tr>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/results.png" width="400">
+<img src="https://raw.githubusercontent.com/your-github-username/ai-document-processor/main/docs/images/results.png" width="400">
 <br>
 <em>Extracted Data View</em>
 </td>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/excel.png" width="400">
+<img src="https://raw.githubusercontent.com/your-github-username/ai-document-processor/main/docs/images/excel.png" width="400">
 <br>
 <em>Excel Export</em>
 </td>
@@ -160,17 +175,22 @@ graph TD
 
 ## 🛠️ Development
 
-### Local Development Setup
+We offer two local development options:
+
+### 1. Simple Mode (No Docker)
+This is the quickest way to get started. It uses SQLite and an in-process task queue.
 
 ```bash
-# Frontend development
-cd frontend && npm install && npm run dev
-
-# Backend development
-cd backend && pip install -r requirements.txt && python start.py
-
-# Or use our all-in-one dev script! 
+# This script handles everything for you!
 ./scripts/dev.sh
+```
+
+### 2. Docker Mode (Production-like)
+This uses Docker to run the full stack, including PostgreSQL and Redis.
+
+```bash
+# This script builds and starts the Docker containers
+./start-local.sh
 ```
 
 ### Running Tests
@@ -280,7 +300,7 @@ We love contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for 
 
 ```bash
 # Fork the repo, then:
-git clone https://github.com/yourusername/ai-document-processor.git
+git clone https://github.com/your-github-username/ai-document-processor.git
 cd ai-document-processor
 git checkout -b feature/amazing-feature
 # Make your changes
@@ -317,7 +337,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🌟 Star History
 
 <div align="center">
-  <img src="https://api.star-history.com/svg?repos=yourusername/ai-document-processor&type=Date" alt="Star History Chart">
+  <img src="https://api.star-history.com/svg?repos=your-github-username/ai-document-processor&type=Date" alt="Star History Chart">
 </div>
 
 ## 🙏 Acknowledgments
@@ -331,9 +351,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
   <p>
-    <a href="https://github.com/yourusername/ai-document-processor/issues">Report Bug</a>
+    <a href="https://github.com/your-github-username/ai-document-processor/issues">Report Bug</a>
     ·
-    <a href="https://github.com/yourusername/ai-document-processor/issues">Request Feature</a>
+    <a href="https://github.com/your-github-username/ai-document-processor/issues">Request Feature</a>
     ·
     <a href="https://discord.gg/yourdiscord">Join Discord</a>
   </p>

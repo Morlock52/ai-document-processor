@@ -9,11 +9,25 @@ This repository hosts a FastAPI backend with a Next.js frontend for processing P
 - `docs/` – additional documentation and screenshots.
 
 ## Development environment
+
+There are two ways to run the application locally:
+
+**1. Simple, Self-Contained Mode (Recommended for most development)**
+
+This mode uses SQLite for the database and an in-process queue for background tasks, so it has no external dependencies.
+
 1. **Python 3.11+ and Node 18+** are required.
 2. Copy `.env.example` to `.env` and add your `OPENAI_API_KEY`.
-3. Run `./scripts/dev.sh` to launch backend and frontend without Docker.
-   - This script checks ports automatically and installs dependencies if missing.
-4. For a Docker based setup run `./start-local.sh` or `docker-compose -f docker-compose.local.yml up --build`.
+3. Run `./scripts/dev.sh` to launch the backend and frontend.
+   - This script automatically uses the self-contained mode.
+
+**2. Production-like Docker Mode**
+
+This mode uses Docker to run the full application stack, including PostgreSQL and Redis. It's the most accurate representation of the production environment.
+
+1. **Docker and Docker Compose** are required.
+2. Copy `.env.example` to `.env` and add your `OPENAI_API_KEY`.
+3. Run `./start-local.sh` or `docker-compose -f docker-compose.local.yml up --build`.
 
 ## Style guidelines
 - **Python**: format with `black` and lint with `flake8`.

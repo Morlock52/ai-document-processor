@@ -31,13 +31,8 @@ class Settings(BaseSettings):
     ]
 
     # Database
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        (
-            "postgresql://docuser:docpass@localhost:"
-            f"{os.getenv('POSTGRES_PORT', '5432')}/docprocessor"
-        ),
-    )
+    USE_SQLITE: bool = os.getenv("USE_SQLITE", "false").lower() == "true"
+    DATABASE_URL: str
 
     # Redis
     REDIS_URL: str = os.getenv(
@@ -70,12 +65,23 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
 
     def __init__(self, **values):
-        super().__init__(**values)
-        # Load additional env files
+        # Load additional env files first
         if os.path.exists(".env.ports"):
             from dotenv import load_dotenv
-
             load_dotenv(".env.ports", override=True)
+
+        super().__init__(**values)
+
+        if self.USE_SQLITE:
+            self.DATABASE_URL = "sqlite:///./dev.db"
+        else:
+            self.DATABASE_URL = os.getenv(
+                "DATABASE_URL",
+                (
+                    "postgresql://docuser:docpass@localhost:"
+                    f"{os.getenv('POSTGRES_PORT', '5432')}/docprocessor"
+                ),
+            )
 
 
 settings = Settings()
