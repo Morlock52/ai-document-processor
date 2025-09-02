@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Realtime Speech Chatbot</title>
+  </head>
+  <body>
+    <button id="start">Start Chat</button>
+    <script>
+      async function start() {
+        const tokenResponse = await fetch("/session");
+        const data = await tokenResponse.json();
+        const token = data.client_secret?.value;
+        if (!token) {
+          alert("No token returned from server");
+          return;
+        }
+        const pc = new RTCPeerConnection();
+        pc.ontrack = (e) => {
+          const audioEl = document.createElement("audio");
+          audioEl.autoplay = true;
+          audioEl.srcObject = e.streams[0];
+          document.body.appendChild(audioEl);
+        };
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        const url =
+          "https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview";
+        const resp = await fetch(url, {
+          method: "POST",
+          body: offer.sdp,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/sdp",
+          },
+        });
+        const answer = { type: "answer", sdp: await resp.text() };
+        await pc.setRemoteDescription(answer);
+      }
+      document.getElementById("start").onclick = start;
+    </script>
+  </body>
+</html>
