@@ -46,7 +46,10 @@ class Settings(BaseSettings):
 
     # OpenAI
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-    OPENAI_MODEL: str = "gpt-4o"
+    # Default to gpt-4o (latest vision model as of 2025)
+    # Alternatives: gpt-4o-mini (cheaper), gpt-4.1 (better text/coding)
+    # For document processing with vision, gpt-4o is recommended
+    OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o")
 
     # AWS S3
     AWS_ACCESS_KEY_ID: str = os.getenv("AWS_ACCESS_KEY_ID", "")

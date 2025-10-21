@@ -20,12 +20,14 @@ services:
       - "8005:8000"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
       - DATABASE_URL=postgresql://docuser:docpass@postgres:5432/docprocessor
       - REDIS_URL=redis://redis:6379/0
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - S3_BUCKET_NAME=${S3_BUCKET_NAME}
       - UPLOAD_DIR=/app/uploads
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,6 +46,7 @@ services:
       dockerfile: worker/Dockerfile
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
       - DATABASE_URL=postgresql://docuser:docpass@postgres:5432/docprocessor
       - REDIS_URL=redis://redis:6379/0
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -52,6 +55,7 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
       - UPLOAD_DIR=/app/uploads
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
       postgres:
         condition: service_healthy

@@ -70,9 +70,13 @@ Perfect for automating data extraction from:
 
 ## 🚀 Quick Start
 
+> 📘 **Comprehensive Setup Guide:** See [DOCKER_SETUP.md](DOCKER_SETUP.md) for detailed Docker setup instructions
+>
+> 🤖 **OpenAI Model Guide:** See [OPENAI_MODEL_GUIDE.md](OPENAI_MODEL_GUIDE.md) for model selection and optimization
+
 ### Prerequisites
-- Docker & Docker Compose
-- OpenAI API key with GPT-4o access
+- Docker & Docker Compose (v20.10+)
+- OpenAI API key with GPT-4o access ([Get one here](https://platform.openai.com/api-keys))
 - 5 minutes of your time ⏱️
 
 ### 1️⃣ Clone & Configure
@@ -84,8 +88,10 @@ cd ai-document-processor
 # Copy environment template
 cp .env.example .env
 
-# Add your OpenAI API key to .env
-# OPENAI_API_KEY=sk-your-key-here
+# Edit .env and add your configuration:
+# OPENAI_API_KEY=sk-your-key-here      # Required
+# OPENAI_MODEL=gpt-4o                   # Recommended (2025)
+# SECRET_KEY=<generate-secure-key>      # Required
 ```
 
 ### 2️⃣ Launch with Auto Port Detection
@@ -235,11 +241,14 @@ if status.json()['status'] == 'completed':
 ```env
 # Required
 OPENAI_API_KEY=sk-your-api-key-here
+OPENAI_MODEL=gpt-4o                     # Default, best for documents (2025)
+SECRET_KEY=your-secure-random-key       # Generate with: openssl rand -hex 32
 
 # Optional - S3 Storage
 AWS_ACCESS_KEY_ID=your-access-key
 AWS_SECRET_ACCESS_KEY=your-secret-key
 S3_BUCKET_NAME=document-processor
+AWS_REGION=us-east-1
 
 # Optional - Custom Ports
 FRONTEND_PORT=3000
@@ -247,6 +256,8 @@ BACKEND_PORT=8000
 POSTGRES_PORT=5432
 REDIS_PORT=6379
 ```
+
+For more details, see [.env.example](.env.example) and [DOCKER_SETUP.md](DOCKER_SETUP.md).
 
 </details>
 
