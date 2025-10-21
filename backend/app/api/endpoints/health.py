@@ -2,7 +2,6 @@ import os
 import time
 import psutil
 import logging
-import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Any
 from fastapi import APIRouter, Depends, HTTPException
@@ -21,11 +20,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Global health metrics cache
-health_cache = {
-    "last_check": None,
-    "metrics": {},
-    "cache_duration": 30  # seconds
-}
+health_cache = {"last_check": None, "metrics": {}, "cache_duration": 30}  # seconds
+
 
 @router.get("/health")
 async def health_check():
@@ -39,11 +35,12 @@ async def health_check():
 
     return {
         "status": "healthy",
-        "version": getattr(settings, 'VERSION', '1.0.0'),
+        "version": getattr(settings, "VERSION", "1.0.0"),
         "service": "Document Processor API",
         "timestamp": datetime.utcnow().isoformat(),
-        "uptime": _get_uptime()
+        "uptime": _get_uptime(),
     }
+
 
 @router.get("/health/detailed")
 async def detailed_health_check(db: Session = Depends(get_db)):
@@ -64,20 +61,23 @@ async def detailed_health_check(db: Session = Depends(get_db)):
 
     # Check cache to avoid excessive health checks
     now = datetime.utcnow()
-    if (health_cache["last_check"] and
-        (now - health_cache["last_check"]).total_seconds() < health_cache["cache_duration"]):
+    if (
+        health_cache["last_check"]
+        and (now - health_cache["last_check"]).total_seconds()
+        < health_cache["cache_duration"]
+    ):
         logger.debug("🏥 HEALTH_CACHE: Returning cached results")
         return health_cache["metrics"]
 
     health_status = {
         "status": "healthy",
-        "version": getattr(settings, 'VERSION', '1.0.0'),
+        "version": getattr(settings, "VERSION", "1.0.0"),
         "service": "Document Processor API",
         "timestamp": now.isoformat(),
         "checks": {},
         "metrics": {},
         "self_healing": [],
-        "warnings": []
+        "warnings": [],
     }
 
     critical_failures = []
@@ -88,31 +88,35 @@ async def detailed_health_check(db: Session = Depends(get_db)):
 
         # Test basic connectivity
         db_start = time.time()
-        result = db.execute(text("SELECT 1")).scalar()
+        db.execute(text("SELECT 1")).scalar()
         db_time = time.time() - db_start
 
         # Test document table access
         doc_count = db.query(Document).count()
-        processing_count = db.query(Document).filter(
-            Document.status == ProcessingStatus.PROCESSING
-        ).count()
+        processing_count = (
+            db.query(Document)
+            .filter(Document.status == ProcessingStatus.PROCESSING)
+            .count()
+        )
 
         health_status["checks"]["database"] = {
             "status": "healthy",
             "response_time_ms": round(db_time * 1000, 2),
             "total_documents": doc_count,
             "processing_documents": processing_count,
-            "connection_pool": _get_db_pool_info()
+            "connection_pool": _get_db_pool_info(),
         }
 
-        logger.info(f"✅ DB_HEALTHY: {doc_count} docs, {processing_count} processing, {db_time*1000:.1f}ms")
+        logger.info(
+            f"✅ DB_HEALTHY: {doc_count} docs, {processing_count} processing, {db_time*1000:.1f}ms"
+        )
 
     except SQLAlchemyError as e:
         error_msg = f"Database error: {str(e)}"
         health_status["checks"]["database"] = {
             "status": "unhealthy",
             "error": error_msg,
-            "last_attempt": now.isoformat()
+            "last_attempt": now.isoformat(),
         }
         critical_failures.append("database")
         logger.error(f"❌ DB_UNHEALTHY: {error_msg}")
@@ -132,28 +136,31 @@ async def detailed_health_check(db: Session = Depends(get_db)):
 
         redis_start = time.time()
         redis_client = redis.Redis.from_url(settings.REDIS_URL)
-        redis_info = redis_client.ping()
+        redis_client.ping()
         redis_time = time.time() - redis_start
 
         # Get Redis metrics
-        redis_memory = redis_client.info('memory')
-        queue_length = redis_client.llen('rq:queue:default') if redis_client.exists('rq:queue:default') else 0
+        redis_memory = redis_client.info("memory")
+        queue_length = (
+            redis_client.llen("rq:queue:default")
+            if redis_client.exists("rq:queue:default")
+            else 0
+        )
 
         health_status["checks"]["redis"] = {
             "status": "healthy",
             "response_time_ms": round(redis_time * 1000, 2),
             "queue_length": queue_length,
-            "memory_used_mb": round(redis_memory.get('used_memory', 0) / 1024 / 1024, 2)
+            "memory_used_mb": round(
+                redis_memory.get("used_memory", 0) / 1024 / 1024, 2
+            ),
         }
 
         logger.info(f"✅ REDIS_HEALTHY: Queue={queue_length}, {redis_time*1000:.1f}ms")
 
     except Exception as e:
         error_msg = f"Redis error: {str(e)}"
-        health_status["checks"]["redis"] = {
-            "status": "unhealthy",
-            "error": error_msg
-        }
+        health_status["checks"]["redis"] = {"status": "unhealthy", "error": error_msg}
         critical_failures.append("redis")
         logger.error(f"❌ REDIS_UNHEALTHY: {error_msg}")
 
@@ -164,7 +171,7 @@ async def detailed_health_check(db: Session = Depends(get_db)):
         if not settings.OPENAI_API_KEY:
             health_status["checks"]["openai"] = {
                 "status": "not_configured",
-                "error": "API key not provided"
+                "error": "API key not provided",
             }
             health_status["warnings"].append("OpenAI API key not configured")
         else:
@@ -179,18 +186,15 @@ async def detailed_health_check(db: Session = Depends(get_db)):
             health_status["checks"]["openai"] = {
                 "status": "healthy",
                 "response_time_ms": round(openai_time * 1000, 2),
-                "models_available": len(models.data) if hasattr(models, 'data') else 0,
-                "key_configured": True
+                "models_available": len(models.data) if hasattr(models, "data") else 0,
+                "key_configured": True,
             }
 
             logger.info(f"✅ OPENAI_HEALTHY: {openai_time*1000:.1f}ms")
 
     except Exception as e:
         error_msg = f"OpenAI API error: {str(e)}"
-        health_status["checks"]["openai"] = {
-            "status": "unhealthy",
-            "error": error_msg
-        }
+        health_status["checks"]["openai"] = {"status": "unhealthy", "error": error_msg}
         critical_failures.append("openai")
         logger.error(f"❌ OPENAI_UNHEALTHY: {error_msg}")
 
@@ -200,14 +204,16 @@ async def detailed_health_check(db: Session = Depends(get_db)):
 
         # Check upload directory
         upload_dir = settings.UPLOAD_DIR
-        disk_usage = psutil.disk_usage(upload_dir if os.path.exists(upload_dir) else '/')
+        disk_usage = psutil.disk_usage(
+            upload_dir if os.path.exists(upload_dir) else "/"
+        )
 
         # Count files in upload directory
         file_count = 0
         total_size = 0
         if os.path.exists(upload_dir):
             for file in os.listdir(upload_dir):
-                if file.endswith('.pdf'):
+                if file.endswith(".pdf"):
                     file_path = os.path.join(upload_dir, file)
                     file_count += 1
                     total_size += os.path.getsize(file_path)
@@ -221,11 +227,13 @@ async def detailed_health_check(db: Session = Depends(get_db)):
             "upload_files_count": file_count,
             "upload_size_mb": round(total_size / (1024**2), 2),
             "disk_free_gb": round(disk_free_gb, 2),
-            "disk_used_percent": round(disk_used_percent, 1)
+            "disk_used_percent": round(disk_used_percent, 1),
         }
 
         if disk_free_gb < 1:
-            health_status["warnings"].append(f"Low disk space: {disk_free_gb:.1f}GB free")
+            health_status["warnings"].append(
+                f"Low disk space: {disk_free_gb:.1f}GB free"
+            )
 
         logger.info(f"✅ FS_HEALTHY: {file_count} files, {disk_free_gb:.1f}GB free")
 
@@ -237,19 +245,18 @@ async def detailed_health_check(db: Session = Depends(get_db)):
 
     except Exception as e:
         logger.error(f"❌ FS_CHECK_FAILED: {str(e)}")
-        health_status["checks"]["filesystem"] = {
-            "status": "error",
-            "error": str(e)
-        }
+        health_status["checks"]["filesystem"] = {"status": "error", "error": str(e)}
 
     # 5. SYSTEM METRICS
     try:
         health_status["metrics"] = {
             "cpu_percent": psutil.cpu_percent(interval=1),
             "memory_percent": psutil.virtual_memory().percent,
-            "memory_available_gb": round(psutil.virtual_memory().available / (1024**3), 2),
+            "memory_available_gb": round(
+                psutil.virtual_memory().available / (1024**3), 2
+            ),
             "process_count": len(psutil.pids()),
-            "load_average": os.getloadavg() if hasattr(os, 'getloadavg') else None
+            "load_average": os.getloadavg() if hasattr(os, "getloadavg") else None,
         }
 
         # Warnings for high resource usage
@@ -276,7 +283,9 @@ async def detailed_health_check(db: Session = Depends(get_db)):
     health_cache["last_check"] = now
     health_cache["metrics"] = health_status
 
-    logger.info(f"🏥 HEALTH_COMPLETE: Status={health_status['status']}, Time={elapsed_time*1000:.1f}ms")
+    logger.info(
+        f"🏥 HEALTH_COMPLETE: Status={health_status['status']}, Time={elapsed_time*1000:.1f}ms"
+    )
 
     # Return appropriate HTTP status
     if health_status["status"] == "unhealthy":
@@ -284,25 +293,25 @@ async def detailed_health_check(db: Session = Depends(get_db)):
 
     return health_status
 
+
 def _get_uptime() -> str:
     """Get application uptime"""
     try:
-        with open('/proc/uptime', 'r') as f:
+        with open("/proc/uptime", "r") as f:
             uptime_seconds = float(f.readline().split()[0])
             return str(timedelta(seconds=int(uptime_seconds)))
-    except:
+    except (FileNotFoundError, ValueError, IndexError):
         return "unknown"
+
 
 def _get_db_pool_info() -> Dict[str, Any]:
     """Get database connection pool information"""
     try:
         # This would need to be implemented based on your connection pool
-        return {
-            "active_connections": "unknown",
-            "pool_size": "unknown"
-        }
-    except:
+        return {"active_connections": "unknown", "pool_size": "unknown"}
+    except Exception:
         return {}
+
 
 async def _cleanup_old_files(upload_dir: str) -> int:
     """Clean up old files to free disk space"""

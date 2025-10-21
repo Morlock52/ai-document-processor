@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+import asyncio
 import boto3
 from botocore.exceptions import ClientError
 
@@ -21,7 +22,10 @@ class S3Service:
     async def upload_file(self, file_path: str, s3_key: str) -> bool:
         """Upload a file to S3"""
         try:
-            self.s3_client.upload_file(file_path, self.bucket_name, s3_key)
+            await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: self.s3_client.upload_file(file_path, self.bucket_name, s3_key),
+            )
             logger.info(f"File uploaded to S3: {s3_key}")
             return True
         except ClientError as e:
@@ -31,7 +35,12 @@ class S3Service:
     async def download_file(self, s3_key: str, local_path: str) -> bool:
         """Download a file from S3"""
         try:
-            self.s3_client.download_file(self.bucket_name, s3_key, local_path)
+            await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: self.s3_client.download_file(
+                    self.bucket_name, s3_key, local_path
+                ),
+            )
             logger.info(f"File downloaded from S3: {s3_key}")
             return True
         except ClientError as e:
@@ -41,7 +50,12 @@ class S3Service:
     async def delete_file(self, s3_key: str) -> bool:
         """Delete a file from S3"""
         try:
-            self.s3_client.delete_object(Bucket=self.bucket_name, Key=s3_key)
+            await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: self.s3_client.delete_object(
+                    Bucket=self.bucket_name, Key=s3_key
+                ),
+            )
             logger.info(f"File deleted from S3: {s3_key}")
             return True
         except ClientError as e:

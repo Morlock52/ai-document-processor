@@ -6,13 +6,11 @@ import os
 import psutil
 import asyncio
 from typing import List, Dict, Any, Optional, Callable
-from pathlib import Path
 import json
 import gc
 from datetime import datetime
 
 from openai import OpenAI
-from openai.types.chat import ChatCompletion
 import cv2
 import numpy as np
 from pdf2image import convert_from_path
@@ -20,8 +18,6 @@ from PIL import Image
 import pytesseract
 
 from app.core.config import settings
-from app.models.document import ProcessingStatus
-from app.db.database import SessionLocal
 
 # Configure comprehensive logging for document processing
 logger = logging.getLogger(__name__)
@@ -363,40 +359,6 @@ class DocumentProcessor:
             logger.warning(f"⚠️  MEMORY_CHECK_FAILED: {e}")
             return 0.0
 
-    def _get_page_count(self, pdf_path: str) -> int:
-        """
-        Get page count from PDF with error handling
-
-        Args:
-            pdf_path: Path to PDF file
-
-        Returns:
-            int: Number of pages in PDF
-
-        Raises:
-            Exception: If page count cannot be determined
-        """
-        try:
-            # Use pdf2image to get page count efficiently
-            from pdf2image.exceptions import PDFInfoNotInstalledError, PDFPageCountError
-
-            try:
-                images = convert_from_path(pdf_path, first_page=1, last_page=1)
-                # If we can convert first page, use pdf2image to get total count
-                info = convert_from_path(pdf_path, dpi=50, fmt="jpeg", thread_count=1)
-                return len(info)
-            except (PDFInfoNotInstalledError, PDFPageCountError):
-                # Fallback to PyPDF2 if pdf2image fails
-                import PyPDF2
-
-                with open(pdf_path, "rb") as file:
-                    pdf_reader = PyPDF2.PdfReader(file)
-                    return len(pdf_reader.pages)
-
-        except Exception as e:
-            logger.error(f"❌ PAGE_COUNT_ERROR: {e} for file {pdf_path}")
-            raise
-
     async def _process_page_chunk_with_recovery(
         self,
         pdf_path: str,
@@ -617,7 +579,7 @@ class DocumentProcessor:
             response = await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: self.openai_client.chat.completions.create(
-                    model="gpt-4-vision-preview",
+                    model=settings.OPENAI_MODEL,
                     messages=[
                         {
                             "role": "user",
@@ -654,67 +616,6 @@ class DocumentProcessor:
             logger.error(f"❌ GPT_API_FAILED: {page_id}, Error={e}")
             raise
 
-    def _build_extraction_prompt(self, schema: Optional[Dict] = None) -> str:
-        """
-        Build extraction prompt for GPT-4o Vision
-
-        Args:
-            schema: Optional extraction schema
-
-        Returns:
-            str: Formatted prompt
-        """
-        base_prompt = """
-        Extract all visible text and data from this document image.
-        Return the data in JSON format with clear field names.
-
-        Focus on extracting:
-        - Headers and titles
-        - Form fields and their values
-        - Tables and structured data
-        - Important numbers and dates
-        - Any key-value pairs
-
-        Use "N/A" for missing or unclear values.
-        """
-
-        if schema:
-            schema_prompt = f"\n\nPlease extract data according to this schema: {json.dumps(schema, indent=2)}"
-            return base_prompt + schema_prompt
-
-        return base_prompt
-
-    def _merge_page_data(
-        self, extracted_data: List[Dict[str, Any]], schema: Optional[Dict] = None
-    ) -> Dict[str, Any]:
-        """
-        Merge data from multiple pages into a single result
-
-        Args:
-            extracted_data: List of data from each page
-            schema: Optional schema for merging logic
-
-        Returns:
-            Dict containing merged data
-        """
-        if not extracted_data:
-            return {}
-
-        if len(extracted_data) == 1:
-            return extracted_data[0]
-
-        # Merge logic: combine unique keys, prefer non-empty values
-        merged = {}
-
-        for page_data in extracted_data:
-            for key, value in page_data.items():
-                if key not in merged or (
-                    merged[key] in [None, "", "N/A"] and value not in [None, "", "N/A"]
-                ):
-                    merged[key] = value
-
-        return merged
-
     @staticmethod
     def get_processing_metrics() -> Dict[str, Any]:
         """
@@ -748,8 +649,6 @@ class DocumentProcessor:
             return count
         except ImportError:
             # Fallback to pdf2image if PyMuPDF not available
-            from pdf2image.exceptions import PDFInfoNotInstalledError
-
             try:
                 import subprocess
 
@@ -1038,10 +937,10 @@ class ImagePreprocessor:
     def _enhance_contrast(self, image: np.ndarray) -> np.ndarray:
         """Enhance contrast using CLAHE"""
         lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-        l, a, b = cv2.split(lab)
+        l_channel, a, b = cv2.split(lab)
         clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-        l = clahe.apply(l)
-        enhanced = cv2.merge([l, a, b])
+        l_channel = clahe.apply(l_channel)
+        enhanced = cv2.merge([l_channel, a, b])
         return cv2.cvtColor(enhanced, cv2.COLOR_LAB2BGR)
 
     def _sharpen(self, image: np.ndarray) -> np.ndarray:

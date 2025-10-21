@@ -1,7 +1,6 @@
 import logging
 import time
 from typing import Optional, Dict, Any
-import os
 
 from sqlalchemy.orm import Session
 from redis import Redis
