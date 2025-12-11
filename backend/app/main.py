@@ -8,6 +8,7 @@ from app.api.api import api_router
 from app.core.config import settings
 from app.db.database import engine, Base
 from app.middleware.logging_middleware import RequestLoggingMiddleware
+import app.models  # noqa: F401
 
 # Configure logging with rotating file handler for better persistence
 log_handlers = [

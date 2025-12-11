@@ -210,7 +210,10 @@ cd document-processor && docker-compose up -d
 - **Production**: `http://your-domain.com/api/v1`
 
 ### Authentication
-Currently, the API doesn't require authentication. For production use, consider adding JWT tokens or API keys.
+- Login is **optional** on first install; the app runs open while you explore.
+- To require a passcode, call `PUT /api/v1/auth/settings/login` with `require_login=true` and a passcode or use the Access control card in the UI (enter the passcode twice).
+- Clients can check the current mode via `GET /api/v1/auth/status` and exchange the passcode for a bearer token with `POST /api/v1/auth/login`.
+- When the lock is on, document and schema endpoints expect `Authorization: Bearer <token>` and respond with `401` otherwise.
 
 ### Core Endpoints
 

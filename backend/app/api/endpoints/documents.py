@@ -28,6 +28,7 @@ from app.services.excel_exporter import ExcelExporter
 from app.services.s3_service import S3Service
 from app.core.config import settings
 from app.utils.background_tasks import enqueue_document_processing, get_job_status
+from app.utils.security import require_login_if_enabled
 
 # Configure comprehensive logging
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - [%(filename)s:%(lineno)d]'
 )
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_login_if_enabled)])
 
 @router.post("/upload", response_model=DocumentResponse)
 async def upload_document(

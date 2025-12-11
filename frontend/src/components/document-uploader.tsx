@@ -23,9 +23,10 @@ interface UploadedFile {
 
 interface DocumentUploaderProps {
   templateMode?: boolean;
+  canUpload?: boolean;
 }
 
-export function DocumentUploader({ templateMode = false }: DocumentUploaderProps) {
+export function DocumentUploader({ templateMode = false, canUpload = true }: DocumentUploaderProps) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -139,6 +140,15 @@ export function DocumentUploader({ templateMode = false }: DocumentUploaderProps
   });
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (!canUpload) {
+      toast({
+        title: 'Login required',
+        description: 'Enable and complete login to upload documents.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const newFiles: UploadedFile[] = acceptedFiles.map((file) => ({
       file,
       id: Math.random().toString(36).substring(7),
@@ -157,7 +167,7 @@ export function DocumentUploader({ templateMode = false }: DocumentUploaderProps
       );
       uploadMutation.mutate(uploadedFile);
     });
-  }, [uploadMutation]);
+  }, [uploadMutation, toast, canUpload]);
 
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
@@ -215,6 +225,7 @@ export function DocumentUploader({ templateMode = false }: DocumentUploaderProps
     },
     multiple: true,
     maxSize: 100 * 1024 * 1024, // 100MB
+    disabled: !canUpload,
   });
 
   return (
@@ -223,6 +234,7 @@ export function DocumentUploader({ templateMode = false }: DocumentUploaderProps
         {...getRootProps()}
         className={cn(
           'relative overflow-hidden border-2 border-dashed rounded-3xl p-12 text-center cursor-pointer transition-all duration-300 group',
+          !canUpload && 'opacity-50 pointer-events-none cursor-not-allowed',
           isDragActive
             ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 scale-[1.02] shadow-2xl'
             : 'border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-gradient-to-br hover:from-gray-50 hover:to-indigo-50 dark:hover:from-gray-800 dark:hover:to-indigo-950/20 hover:shadow-xl'

@@ -1,13 +1,14 @@
 from typing import List
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.document import (
     ExtractionSchema,
     SchemaDetectionRequest,
     SchemaDetectionResponse
 )
 from app.services.schema_detector import SchemaDetector
+from app.utils.security import require_login_if_enabled
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_login_if_enabled)])
 
 # Predefined schemas
 PREDEFINED_SCHEMAS = {

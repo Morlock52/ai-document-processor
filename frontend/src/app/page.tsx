@@ -1,18 +1,194 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DocumentUploader } from '@/components/document-uploader';
 import { DocumentList } from '@/components/document-list';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Zap, Download, ArrowRight, Sparkles, Table, ToggleLeft, ToggleRight } from 'lucide-react';
+import {
+  FileText,
+  Zap,
+  Download,
+  ArrowRight,
+  Sparkles,
+  Table,
+  ToggleLeft,
+  ToggleRight,
+  ShieldCheck,
+  KeyRound,
+  Lock,
+  Unlock,
+  RotateCcw,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { authApi, type ApiError } from '@/lib/api';
+import type { AuthStatus } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Home() {
+  const { toast } = useToast();
   const [templateMode, setTemplateMode] = useState(false);
+  const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passcodeInput, setPasscodeInput] = useState('');
+  const [confirmPasscode, setConfirmPasscode] = useState('');
+  const [loginPasscode, setLoginPasscode] = useState('');
+  const [isUpdatingLogin, setIsUpdatingLogin] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [loginError, setLoginError] = useState('');
+
+  useEffect(() => {
+    const loadStatus = async () => {
+      try {
+        const status = await authApi.status();
+        setAuthStatus(status);
+
+        const storedToken = authApi.getStoredToken();
+        if (!status.require_login || storedToken) {
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Failed to load authentication status', error);
+        toast({
+          title: 'Access control check failed',
+          description: 'Using open mode until settings load.',
+          variant: 'destructive',
+        });
+        setIsAuthenticated(true);
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+
+    void loadStatus();
+  }, [toast]);
+
+  const handleLogin = async () => {
+    setIsSigningIn(true);
+    setLoginError('');
+
+    try {
+      await authApi.login(loginPasscode);
+      setIsAuthenticated(true);
+      setLoginPasscode('');
+      toast({ title: 'Welcome back', description: 'Login enabled features are unlocked.' });
+    } catch (error) {
+      const apiError = error as ApiError;
+      const message = apiError.userMessage || apiError.message || 'Invalid passcode';
+      setLoginError(message);
+      toast({ title: 'Login failed', description: message, variant: 'destructive' });
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleToggleLogin = async (nextState: boolean) => {
+    if (nextState) {
+      if (!passcodeInput || passcodeInput.length < 6) {
+        toast({
+          title: 'Passcode too short',
+          description: 'Use at least 6 characters so the lock is meaningful.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (passcodeInput !== confirmPasscode) {
+        toast({
+          title: 'Passcodes do not match',
+          description: 'Enter the same value twice to avoid lockouts.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    setIsUpdatingLogin(true);
+    try {
+      const status = await authApi.updateLogin(nextState, nextState ? passcodeInput : undefined);
+      setAuthStatus(status);
+      setIsAuthenticated(!status.require_login);
+      setPasscodeInput('');
+      setConfirmPasscode('');
+      toast({
+        title: status.require_login ? 'Login protection enabled' : 'Login protection disabled',
+        description: status.require_login
+          ? 'Users will now need the passcode before processing documents.'
+          : 'Workspace access is open again.',
+      });
+    } catch (error) {
+      const apiError = error as ApiError;
+      toast({
+        title: 'Could not update login setting',
+        description: apiError.userMessage || apiError.message || 'Try again in a moment.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdatingLogin(false);
+    }
+  };
+
+  const lockActive = authStatus?.require_login === true && !isAuthenticated;
+  const apiReady = authStatus ? (!authStatus.require_login || isAuthenticated) : false;
+
+  const handleAuthReset = () => {
+    setIsAuthenticated(false);
+    setLoginPasscode('');
+    setLoginError('Session expired or locked. Sign in again.');
+  };
 
   return (
     <div className="space-y-12">
+      {authChecked && lockActive && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <Card className="w-full max-w-xl border-0 shadow-2xl">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl">Login required</CardTitle>
+                  <CardDescription>
+                    Enter the shared passcode you configured in Settings to unlock document processing.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Access passcode</label>
+                <input
+                  type="password"
+                  value={loginPasscode}
+                  onChange={(e) => setLoginPasscode(e.target.value)}
+                  className="mt-2 w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter the passcode you saved"
+                />
+                {loginError && <p className="mt-2 text-sm text-red-500">{loginError}</p>}
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  size="lg"
+                  className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                  onClick={handleLogin}
+                  disabled={isSigningIn || !loginPasscode.trim()}
+                >
+                  <ShieldCheck className="w-4 h-4 mr-2" /> Unlock workspace
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => setLoginPasscode('')}>
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Clear
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Lost the passcode? Disable login from the server console by setting <code>require_login</code> to false using the new /auth/settings/login endpoint.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 p-8 md:p-12">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25"></div>
@@ -102,6 +278,86 @@ export default function Home() {
         </CardContent>
       </Card>
 
+      <Card className="border-0 shadow-lg rounded-2xl bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-indigo-950/20 dark:via-gray-950/40 dark:to-purple-950/20">
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                {authStatus?.require_login ? <Lock className="w-6 h-6" /> : <Unlock className="w-6 h-6" />}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Access control</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Login is optional on first install. Turn it on once you have set (and confirmed) a passcode.
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs uppercase tracking-wide text-gray-500">Status</p>
+              <p className="font-semibold text-indigo-700 dark:text-indigo-300">
+                {authStatus?.require_login ? 'Protected' : 'Open by default'}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Set passcode (enter twice)</label>
+              <input
+                type="password"
+                value={passcodeInput}
+                onChange={(e) => setPasscodeInput(e.target.value)}
+                className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Create a workspace passcode"
+              />
+              <input
+                type="password"
+                value={confirmPasscode}
+                onChange={(e) => setConfirmPasscode(e.target.value)}
+                className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Confirm the passcode"
+              />
+              <p className="text-xs text-muted-foreground">
+                Two matching entries help prevent typos and aligns with the request to configure it in two steps.
+              </p>
+            </div>
+
+            <div className="space-y-3 p-4 rounded-2xl bg-white/70 dark:bg-gray-900/60 border border-dashed border-indigo-200 dark:border-indigo-900">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200">
+                  <KeyRound className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="font-semibold">How it works</p>
+                  <p className="text-sm text-muted-foreground">Disabled on first install; toggle to require a shared passcode once you have two matching entries.</p>
+                </div>
+              </div>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>Passcode is stored securely server-side.</li>
+                <li>All document and schema endpoints respect the lock.</li>
+                <li>Disable anytime to return to open mode.</li>
+              </ul>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  onClick={() => handleToggleLogin(true)}
+                  disabled={isUpdatingLogin}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                >
+                  <ShieldCheck className="w-4 h-4 mr-2" /> Enable login
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleToggleLogin(false)}
+                  disabled={isUpdatingLogin || !authStatus?.require_login}
+                >
+                  <Unlock className="w-4 h-4 mr-2" /> Disable login
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="upload" className="space-y-8">
         <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 h-12 p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl">
           <TabsTrigger value="upload" className="rounded-xl font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm transition-all duration-200">
@@ -130,7 +386,7 @@ export default function Home() {
               </div>
             </CardHeader>
             <CardContent>
-              <DocumentUploader templateMode={templateMode} />
+              <DocumentUploader templateMode={templateMode} canUpload={apiReady} />
             </CardContent>
           </Card>
 
@@ -206,7 +462,7 @@ export default function Home() {
               </div>
             </CardHeader>
             <CardContent>
-              <DocumentList templateMode={templateMode} />
+              <DocumentList templateMode={templateMode} enabled={apiReady} onAuthError={handleAuthReset} />
             </CardContent>
           </Card>
         </TabsContent>

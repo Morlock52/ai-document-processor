@@ -1,5 +1,11 @@
 import axios, { AxiosError, AxiosResponse, AxiosRequestConfig } from 'axios';
-import type { DocumentListResponse, DocumentUploadResponse, ProcessingStatus } from '@/types';
+import type {
+  AuthStatus,
+  DocumentListResponse,
+  DocumentUploadResponse,
+  LoginResponse,
+  ProcessingStatus,
+} from '@/types';
 
 // Use appropriate URL based on environment
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8005/api/v1';
@@ -25,6 +31,8 @@ export interface RetryConfig {
 // 🔧 Enhanced API client with comprehensive error handling and retry logic
 class EnhancedApiClient {
   private axiosInstance;
+  private authTokenKey = 'adp_auth_token';
+  private authToken: string | null = null;
   private requestTimeout = 30000; // 30 seconds default timeout
   private defaultRetryConfig: RetryConfig = {
     maxRetries: 3,
@@ -46,7 +54,38 @@ class EnhancedApiClient {
       },
     });
 
+    this.hydrateAuthFromStorage();
     this.setupInterceptors();
+  }
+
+  private hydrateAuthFromStorage() {
+    if (typeof window === 'undefined') return;
+
+    const storedToken = window.localStorage.getItem(this.authTokenKey);
+    if (storedToken) {
+      this.setAuthToken(storedToken);
+    }
+  }
+
+  setAuthToken(token?: string | null) {
+    this.authToken = token || null;
+
+    if (this.authToken) {
+      this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${this.authToken}`;
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(this.authTokenKey, this.authToken);
+      }
+    } else {
+      delete this.axiosInstance.defaults.headers.common['Authorization'];
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(this.authTokenKey);
+      }
+    }
+  }
+
+  getStoredToken(): string | null {
+    if (typeof window === 'undefined') return this.authToken;
+    return window.localStorage.getItem(this.authTokenKey);
   }
 
   private setupInterceptors() {
@@ -288,6 +327,23 @@ class EnhancedApiClient {
 
 // Create enhanced API instance
 export const api = new EnhancedApiClient();
+
+// 🔐 Authentication helpers for optional login
+export const authApi = {
+  status: async (): Promise<AuthStatus> => api.get('/auth/status'),
+  updateLogin: async (requireLogin: boolean, passcode?: string): Promise<AuthStatus> =>
+    api.put('/auth/settings/login', {
+      require_login: requireLogin,
+      passcode,
+    }),
+  login: async (passcode: string): Promise<LoginResponse> => {
+    const result = await api.post<LoginResponse>('/auth/login', { passcode });
+    api.setAuthToken(result.access_token);
+    return result;
+  },
+  logout: () => api.setAuthToken(null),
+  getStoredToken: () => api.getStoredToken(),
+};
 
 
 // 📄 Enhanced Document API with comprehensive error handling and progress tracking
