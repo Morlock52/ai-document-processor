@@ -55,3 +55,13 @@ export interface SchemaField {
   required?: boolean;
   multiple?: boolean;
 }
+
+export interface AuthStatus {
+  require_login: boolean;
+  login_configured: boolean;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+}

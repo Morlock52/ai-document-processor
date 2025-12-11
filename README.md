@@ -112,6 +112,13 @@ If you prefer an automated setup, run:
 ./installer.sh
 ```
 
+## 🔐 Optional login (off by default)
+
+- Fresh installs ship with login **disabled** so you can explore immediately.
+- Open the **Access control** card on the homepage, enter the passcode twice, and click **Enable login** to require sign-in.
+- When enabled, a passcode prompt appears before uploads or downloads; disable it anytime from the same card or via `PUT /api/v1/auth/settings/login`.
+- The current status is also available through `GET /api/v1/auth/status` so you can script health checks or audits.
+
 ## 🏗️ Architecture
 
 ```mermaid

@@ -16,7 +16,7 @@ import {
   FileCheck,
   Table,
 } from 'lucide-react';
-import { documentApi } from '@/lib/api';
+import { documentApi, type ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import type { Document, DocumentListResponse } from '@/types';
 import { Progress } from '@/components/ui/progress';
@@ -56,9 +56,11 @@ const statusConfig = {
 
 interface DocumentListProps {
   templateMode?: boolean;
+  enabled?: boolean;
+  onAuthError?: () => void;
 }
 
-export function DocumentList({ templateMode = false }: DocumentListProps) {
+export function DocumentList({ templateMode = false, enabled = true, onAuthError }: DocumentListProps) {
   const [selectedDocs, setSelectedDocs] = useState<number[]>([]);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -66,7 +68,27 @@ export function DocumentList({ templateMode = false }: DocumentListProps) {
   const { data, isLoading, refetch } = useQuery<DocumentListResponse>({
     queryKey: ['documents'],
     queryFn: () => documentApi.list({ limit: 50 }),
-    refetchInterval: 5000, // Poll every 5 seconds
+    enabled,
+    refetchInterval: enabled ? 5000 : false, // Poll every 5 seconds
+    onError: (error: unknown) => {
+      const apiError = error as ApiError;
+
+      if (apiError.status === 401) {
+        onAuthError?.();
+        toast({
+          title: 'Login required',
+          description: 'Sign in with your passcode to see documents.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      toast({
+        title: 'Unable to load documents',
+        description: apiError.userMessage || 'Please try again.',
+        variant: 'destructive',
+      });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -169,6 +191,14 @@ export function DocumentList({ templateMode = false }: DocumentListProps) {
       prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id]
     );
   };
+
+  if (!enabled) {
+    return (
+      <div className="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-dashed border-gray-200 dark:border-gray-800 text-sm text-muted-foreground">
+        Sign in (or wait for access to be enabled) to load your document history.
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

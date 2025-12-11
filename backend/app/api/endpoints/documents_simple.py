@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.document import Document, ProcessingStatus
 from app.schemas.document import DocumentResponse
+from app.utils.security import require_login_if_enabled
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_login_if_enabled)])
 
 @router.post("/test-upload", response_model=DocumentResponse)
 async def test_upload(

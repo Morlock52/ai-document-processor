@@ -11,6 +11,7 @@ This manual explains how to install, configure, and operate the AI Document Proc
   - [3.1 Environment Variables](#31-environment-variables)
   - [3.2 Network & Ports](#32-network--ports)
   - [3.3 Credentials & Secrets](#33-credentials--secrets)
+  - [3.4 Access Control](#34-access-control)
 - [4. Day-to-Day Operations](#4-day-to-day-operations)
   - [4.1 Starting Services](#41-starting-services)
   - [4.2 Uploading & Processing Documents](#42-uploading--processing-documents)
@@ -92,6 +93,15 @@ Add these to `.env` before launch:
 - Store `.env` outside version control.
 - Rotate `OPENAI_API_KEY` and storage credentials regularly.
 - Limit database users to least privilege (read/write for app, admin for maintenance).
+
+### 3.4 Access Control
+- **Default:** Login is disabled on first install so operators can verify the pipeline quickly.
+- **Enable via UI:** Open the homepage, find the **Access control** card, enter a passcode twice, and click **Enable login**. An overlay prompt will then appear for future sessions.
+- **API endpoints:**
+  - `GET /api/v1/auth/status` — returns whether login is required and if a passcode is configured.
+  - `PUT /api/v1/auth/settings/login` — set `require_login=true` with a `passcode` to enable, or `false` to disable.
+  - `POST /api/v1/auth/login` — exchange the passcode for a bearer token; required when the lock is on.
+- **Reset:** If the passcode is lost, send `require_login=false` to `/auth/settings/login` from a trusted environment to reopen the UI, then re-enable with a fresh passcode.
 
 ## 4. Day-to-Day Operations
 
