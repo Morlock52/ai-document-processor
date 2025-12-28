@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import {
@@ -65,12 +65,16 @@ export function DocumentList({ templateMode = false, enabled = true, onAuthError
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data, isLoading, refetch } = useQuery<DocumentListResponse>({
+  const { data, isLoading, refetch, error } = useQuery<DocumentListResponse>({
     queryKey: ['documents'],
     queryFn: () => documentApi.list({ limit: 50 }),
     enabled,
     refetchInterval: enabled ? 5000 : false, // Poll every 5 seconds
-    onError: (error: unknown) => {
+  });
+
+  // Handle query errors
+  useEffect(() => {
+    if (error) {
       const apiError = error as ApiError;
 
       if (apiError.status === 401) {
@@ -88,8 +92,8 @@ export function DocumentList({ templateMode = false, enabled = true, onAuthError
         description: apiError.userMessage || 'Please try again.',
         variant: 'destructive',
       });
-    },
-  });
+    }
+  }, [error, onAuthError, toast]);
 
   const deleteMutation = useMutation({
     mutationFn: documentApi.delete,

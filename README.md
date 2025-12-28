@@ -19,7 +19,7 @@
 </div>
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/hero-screenshot.png" alt="AI Document Processor Screenshot" width="800">
+  <img src="docs/images/hero-screenshot.png" alt="AI Document Processor Screenshot" width="800">
 </div>
 
 ## ✨ Features
@@ -140,26 +140,26 @@ graph TD
 <table>
 <tr>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/upload.png" width="400">
+<img src="docs/images/upload.png" width="400">
 <br>
 <em>Drag & Drop Upload</em>
 </td>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/processing.png" width="400">
+<img src="docs/images/processing.png" width="400">
 <br>
 <em>Real-time Processing</em>
 </td>
 </tr>
 <tr>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/results.png" width="400">
+<img src="docs/images/results.png" width="400">
 <br>
 <em>Extracted Data View</em>
 </td>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/excel.png" width="400">
+<img src="docs/images/excel.png" width="400">
 <br>
-<em>Excel Export</em>
+<em>Excel Export / Template Mode</em>
 </td>
 </tr>
 </table>
