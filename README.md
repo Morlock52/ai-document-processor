@@ -29,6 +29,7 @@
 <td width="33%" valign="top">
 
 ### 🤖 AI-Powered
+
 - **GPT-4o Vision** for intelligent extraction
 - **Auto-detects** form fields & types
 - **Handles** any PDF quality
@@ -38,6 +39,7 @@
 <td width="33%" valign="top">
 
 ### 📊 Excel Export
+
 - **Formatted** spreadsheets
 - **Template mode** for unified datasets
 - **Charts & analytics** included
@@ -50,6 +52,7 @@
 <td width="33%" valign="top">
 
 ### ⚡ Performance
+
 - **Real-time** progress tracking
 - **Batch processing** support
 - **Auto-scaling** with Docker
@@ -62,8 +65,9 @@
 ## 🎯 Use Cases
 
 Perfect for automating data extraction from:
+
 - 📄 **Invoices** - Extract vendor info, line items, totals
-- 🧾 **Receipts** - Capture transaction details automatically  
+- 🧾 **Receipts** - Capture transaction details automatically
 - 📋 **Forms** - Digitize paper forms with high accuracy
 - 📑 **Reports** - Extract tables and structured data
 - 📃 **Any PDF** - Works with scanned or native PDFs
@@ -71,6 +75,7 @@ Perfect for automating data extraction from:
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Docker & Docker Compose
 - OpenAI API key with GPT-4o access
 - 5 minutes of your time ⏱️
@@ -98,6 +103,7 @@ cp .env.example .env
 ### 3️⃣ Open Your Browser
 
 The script will display your unique URLs:
+
 ```
 🚀 Document Processor is running!
 📍 Frontend: http://localhost:3000
@@ -105,9 +111,11 @@ The script will display your unique URLs:
 ```
 
 That's it! Start uploading PDFs and watch the magic happen ✨
+
 ### 🌟 One-Line Installer
 
 If you prefer an automated setup, run:
+
 ```bash
 ./installer.sh
 ```
@@ -128,7 +136,7 @@ graph TD
     B --> D[💾 PostgreSQL]
     B --> E[⚡ Redis Queue]
     B --> F[☁️ S3 Storage]
-    
+
     style A fill:#0070f3,stroke:#fff,color:#fff
     style B fill:#009688,stroke:#fff,color:#fff
     style C fill:#10a37f,stroke:#fff,color:#fff
@@ -176,7 +184,7 @@ cd frontend && npm install && npm run dev
 # Backend development
 cd backend && pip install -r requirements.txt && python start.py
 
-# Or use our all-in-one dev script! 
+# Or use our all-in-one dev script!
 ./scripts/dev.sh
 ```
 
@@ -199,12 +207,12 @@ Interactive API docs available at `http://localhost:8000/docs` when running.
 
 ### Key Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/documents/upload` | Upload PDF document |
-| `GET` | `/api/v1/documents/{id}/status` | Check processing status |
-| `GET` | `/api/v1/documents/{id}/download/excel` | Download as Excel |
-| `POST` | `/api/v1/documents/batch/process` | Batch process multiple docs |
+| Method | Endpoint                                | Description                 |
+| ------ | --------------------------------------- | --------------------------- |
+| `POST` | `/api/v1/documents/upload`              | Upload PDF document         |
+| `GET`  | `/api/v1/documents/{id}/status`         | Check processing status     |
+| `GET`  | `/api/v1/documents/{id}/download/excel` | Download as Excel           |
+| `POST` | `/api/v1/documents/batch/process`       | Batch process multiple docs |
 
 <details>
 <summary>View Full API Reference</summary>
@@ -262,7 +270,7 @@ REDIS_PORT=6379
 
 ```yaml
 # docker-compose.override.yml
-version: '3.8'
+version: "3.8"
 
 services:
   frontend:
@@ -298,12 +306,12 @@ git push origin feature/amazing-feature
 
 ## 📊 Performance Benchmarks
 
-| Document Type | Pages | Processing Time | Accuracy |
-|--------------|-------|----------------|----------|
-| Invoice | 1 | ~15s | 98.5% |
-| Multi-page Form | 10 | ~2.5min | 97.2% |
-| Scanned Receipt | 1 | ~20s | 95.8% |
-| Complex Report | 50 | ~12min | 96.4% |
+| Document Type   | Pages | Processing Time | Accuracy |
+| --------------- | ----- | --------------- | -------- |
+| Invoice         | 1     | ~15s            | 98.5%    |
+| Multi-page Form | 10    | ~2.5min         | 97.2%    |
+| Scanned Receipt | 1     | ~20s            | 95.8%    |
+| Complex Report  | 50    | ~12min          | 96.4%    |
 
 ## 🚧 Roadmap
 
@@ -316,6 +324,22 @@ git push origin feature/amazing-feature
 - [ ] Webhook notifications
 - [ ] Cloud deployment templates
 - [ ] Mobile app
+
+## 🗣️ Realtime Speech Chatbot
+
+Try the new Realtime API speech demo:
+
+1. Set your `OPENAI_API_KEY` environment variable.
+   - macOS/Linux: `export OPENAI_API_KEY="sk-..."`
+   - PowerShell: `$Env:OPENAI_API_KEY="sk-..."`
+2. Start the demo server:
+
+   ```bash
+   cd examples/realtime-speech-chatbot
+   node server.mjs
+   ```
+
+Then open [http://localhost:3000](http://localhost:3000) and click **Start Chat** to talk with the model using your microphone.
 
 ## 📄 License
 
