@@ -14,8 +14,9 @@ Quick guide to run AI Document Processor locally with Docker.
 ### 1. Clone & Configure
 
 ```bash
-# Clone the repository (or use your existing copy)
-cd /Users/morlock/Morlock/scan/document-processor
+# Clone the repository
+git clone https://github.com/morlock52/ai-document-processor.git
+cd ai-document-processor
 
 # Copy environment template
 cp .env.example .env

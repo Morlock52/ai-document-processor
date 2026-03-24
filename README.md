@@ -19,7 +19,7 @@
 </div>
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/hero-screenshot.png" alt="AI Document Processor Screenshot" width="800">
+  <img src="https://raw.githubusercontent.com/morlock52/ai-document-processor/main/docs/images/hero-screenshot.png" alt="AI Document Processor Screenshot" width="800">
 </div>
 
 ## ✨ Features
@@ -83,7 +83,7 @@ Perfect for automating data extraction from:
 ### 1️⃣ Clone & Configure
 
 ```bash
-git clone https://github.com/yourusername/ai-document-processor.git
+git clone https://github.com/morlock52/ai-document-processor.git
 cd ai-document-processor
 
 # Copy environment template
@@ -148,24 +148,24 @@ graph TD
 <table>
 <tr>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/upload.png" width="400">
+<img src="https://raw.githubusercontent.com/morlock52/ai-document-processor/main/docs/images/upload.png" width="400">
 <br>
 <em>Drag & Drop Upload</em>
 </td>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/processing.png" width="400">
+<img src="https://raw.githubusercontent.com/morlock52/ai-document-processor/main/docs/images/processing.png" width="400">
 <br>
 <em>Real-time Processing</em>
 </td>
 </tr>
 <tr>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/results.png" width="400">
+<img src="https://raw.githubusercontent.com/morlock52/ai-document-processor/main/docs/images/results.png" width="400">
 <br>
 <em>Extracted Data View</em>
 </td>
 <td align="center">
-<img src="https://raw.githubusercontent.com/yourusername/ai-document-processor/main/docs/images/excel.png" width="400">
+<img src="https://raw.githubusercontent.com/morlock52/ai-document-processor/main/docs/images/excel.png" width="400">
 <br>
 <em>Excel Export</em>
 </td>
@@ -295,7 +295,7 @@ We love contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for 
 
 ```bash
 # Fork the repo, then:
-git clone https://github.com/yourusername/ai-document-processor.git
+git clone https://github.com/morlock52/ai-document-processor.git
 cd ai-document-processor
 git checkout -b feature/amazing-feature
 # Make your changes
@@ -348,7 +348,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🌟 Star History
 
 <div align="center">
-  <img src="https://api.star-history.com/svg?repos=yourusername/ai-document-processor&type=Date" alt="Star History Chart">
+  <img src="https://api.star-history.com/svg?repos=morlock52/ai-document-processor&type=Date" alt="Star History Chart">
 </div>
 
 ## 🙏 Acknowledgments
@@ -362,11 +362,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
   <p>
-    <a href="https://github.com/yourusername/ai-document-processor/issues">Report Bug</a>
+    <a href="https://github.com/morlock52/ai-document-processor/issues">Report Bug</a>
     ·
-    <a href="https://github.com/yourusername/ai-document-processor/issues">Request Feature</a>
-    ·
-    <a href="https://discord.gg/yourdiscord">Join Discord</a>
+    <a href="https://github.com/morlock52/ai-document-processor/issues">Request Feature</a>
   </p>
   <p>
     Made with ❤️ by the AI Document Processor Team

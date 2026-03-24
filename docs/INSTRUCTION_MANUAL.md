@@ -83,7 +83,7 @@ AI Document Processor is an enterprise-grade web application that leverages **GP
 **Using Docker (Recommended)**
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/ai-document-processor.git
+git clone https://github.com/morlock52/ai-document-processor.git
 cd ai-document-processor
 
 # Configure environment
@@ -178,7 +178,7 @@ flowchart LR
 
 #### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/your-org/ai-document-processor.git
+git clone https://github.com/morlock52/ai-document-processor.git
 cd ai-document-processor
 ```
 
@@ -855,7 +855,7 @@ docker-compose exec backend python -c "from app.db.session import engine; print(
 
 If issues persist:
 
-1. Check the [GitHub Issues](https://github.com/your-org/ai-document-processor/issues)
+1. Check the [GitHub Issues](https://github.com/morlock52/ai-document-processor/issues)
 2. Review the [Operations Manual](./operations-manual.md)
 3. Consult the [API Documentation](http://localhost:8000/docs)
 
@@ -935,4 +935,4 @@ The system can process various document types:
 
 *Last Updated: January 2025*
 
-*For the latest documentation, visit the [GitHub Repository](https://github.com/your-org/ai-document-processor)*
+*For the latest documentation, visit the [GitHub Repository](https://github.com/morlock52/ai-document-processor)*

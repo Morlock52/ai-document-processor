@@ -15,7 +15,7 @@ Before deploying, ensure you have:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/ai-document-processor.git
+git clone https://github.com/morlock52/ai-document-processor.git
 cd ai-document-processor
 
 # 2. Create production environment file
@@ -261,6 +261,6 @@ jobs:
 
 ## 📞 Support
 
-- GitHub Issues: [Report issues](https://github.com/yourusername/ai-document-processor/issues)
-- Discord: [Join community](https://discord.gg/yourdiscord)
-- Email: support@yourdomain.com
+- GitHub Issues: [Report issues](https://github.com/morlock52/ai-document-processor/issues)
+- Discord: [Join community](https://github.com/morlock52/ai-document-processor/discussions)
+- Email: https://github.com/morlock52/ai-document-processor/issues
