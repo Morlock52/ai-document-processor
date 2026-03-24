@@ -8,7 +8,7 @@ import type {
 } from '@/types';
 
 // Use appropriate URL based on environment
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8005/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 // 🏥 Enhanced error types for better error handling and user feedback
 export interface ApiError {
@@ -510,7 +510,7 @@ export const documentApi = {
         hasSchema: !!schema
       });
 
-      const result = await api.post('/documents/batch/process', {
+      const result = await api.post('/documents/batch-process', {
         document_ids: documentIds,
         schema,
       });

@@ -207,12 +207,15 @@ Interactive API docs available at `http://localhost:8000/docs` when running.
 
 ### Key Endpoints
 
-| Method | Endpoint                                | Description                 |
-| ------ | --------------------------------------- | --------------------------- |
-| `POST` | `/api/v1/documents/upload`              | Upload PDF document         |
-| `GET`  | `/api/v1/documents/{id}/status`         | Check processing status     |
-| `GET`  | `/api/v1/documents/{id}/download/excel` | Download as Excel           |
-| `POST` | `/api/v1/documents/batch/process`       | Batch process multiple docs |
+| Method | Endpoint                                     | Description                  |
+| ------ | -------------------------------------------- | ---------------------------- |
+| `POST` | `/api/v1/documents/upload`                   | Upload PDF document          |
+| `POST` | `/api/v1/documents/process/{id}`             | Start processing a document  |
+| `GET`  | `/api/v1/documents/{id}/status`              | Check processing status      |
+| `GET`  | `/api/v1/documents/{id}/download/excel`      | Download as Excel            |
+| `POST` | `/api/v1/documents/batch-process`            | Batch process multiple docs  |
+| `GET`  | `/api/v1/documents/batch/download/excel`     | Batch download Excel         |
+| `GET`  | `/api/v1/documents/template/download/excel`  | Download template Excel      |
 
 <details>
 <summary>View Full API Reference</summary>

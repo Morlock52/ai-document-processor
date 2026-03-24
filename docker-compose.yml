@@ -2,9 +2,9 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3005:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://api:8000/api/v1
+      - NEXT_PUBLIC_API_URL=http://localhost/api/v1
     depends_on:
       - api
     volumes:
@@ -17,7 +17,7 @@ services:
   api:
     build: ./backend
     ports:
-      - "8005:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DATABASE_URL=postgresql://docuser:docpass@postgres:5432/docprocessor
@@ -78,7 +78,7 @@ services:
       - POSTGRES_PASSWORD=docpass
       - POSTGRES_DB=docprocessor
     ports:
-      - "5434:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

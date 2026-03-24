@@ -376,7 +376,7 @@ sequenceDiagram
     FE->>BE: Poll status
     BE-->>FE: Return completion
     U->>FE: Click export
-    FE->>BE: GET /api/v1/documents/{id}/export/excel
+    FE->>BE: GET /api/v1/documents/{id}/download/excel
     BE-->>FE: Download Excel file
 ```
 
@@ -535,7 +535,7 @@ Authorization: Bearer <token>
 | `GET` | `/documents` | List all documents |
 | `GET` | `/documents/{id}` | Get document details |
 | `GET` | `/documents/{id}/status` | Get processing status |
-| `GET` | `/documents/{id}/export/excel` | Download Excel export |
+| `GET` | `/documents/{id}/download/excel` | Download Excel export |
 | `DELETE` | `/documents/{id}` | Delete a document |
 
 #### Template Mode
@@ -603,7 +603,7 @@ curl "http://localhost:8000/api/v1/documents/doc_abc123/status"
 
 **Request:**
 ```bash
-curl -O -J "http://localhost:8000/api/v1/documents/doc_abc123/export/excel"
+curl -O -J "http://localhost:8000/api/v1/documents/doc_abc123/download/excel"
 ```
 
 **Response:** Binary Excel file download
@@ -631,7 +631,7 @@ print(f"Status: {status['status']}")
 
 # Download Excel when complete
 if status["status"] == "completed":
-    excel = requests.get(f"{API_BASE}/documents/{doc_id}/export/excel")
+    excel = requests.get(f"{API_BASE}/documents/{doc_id}/download/excel")
     with open("output.xlsx", "wb") as f:
         f.write(excel.content)
 ```
@@ -657,7 +657,7 @@ const status = await statusResponse.json();
 
 // Download Excel
 if (status.status === 'completed') {
-  const excelResponse = await fetch(`${API_BASE}/documents/${docId}/export/excel`);
+  const excelResponse = await fetch(`${API_BASE}/documents/${docId}/download/excel`);
   const blob = await excelResponse.blob();
   // Handle blob download
 }
