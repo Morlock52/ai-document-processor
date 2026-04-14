@@ -27,11 +27,11 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting up application...")
-    # Create database tables
     Base.metadata.create_all(bind=engine)
     yield
-    # Shutdown
+    # Shutdown — release all pooled connections cleanly
     logger.info("Shutting down application...")
+    engine.dispose()
 
 
 app = FastAPI(

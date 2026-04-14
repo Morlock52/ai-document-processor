@@ -35,8 +35,8 @@
 The AI Document Processor is a modern web application that automatically extracts structured data from PDF documents using OpenAI's GPT-4o Vision model. It features a beautiful React frontend with dark/light themes and a robust FastAPI backend with real-time processing updates.
 
 ### 🎪 Live Demo
-- **Frontend**: [http://74.208.184.195:3000](http://74.208.184.195:3000) *(if deployed)*
-- **API Docs**: [http://74.208.184.195:8000/docs](http://74.208.184.195:8000/docs) *(if deployed)*
+- **Frontend**: http://localhost:3000 *(after local setup)*
+- **API Docs**: http://localhost:8000/docs *(after local setup)*
 
 ### 🔗 Related Resources
 - [OpenAI GPT-4V Documentation](https://platform.openai.com/docs/guides/vision)

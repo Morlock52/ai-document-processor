@@ -80,6 +80,13 @@ async def upload_document(
             logger.warning(f"❌ UPLOAD_FAILED: File too large {file.size}B > {settings.MAX_UPLOAD_SIZE}B, Client={client_ip}")
             raise HTTPException(status_code=400, detail=f"File size exceeds {settings.MAX_UPLOAD_SIZE} bytes")
 
+        # Validate actual PDF magic bytes — client-supplied Content-Type can be spoofed
+        header = await file.read(5)
+        await file.seek(0)
+        if header != b"%PDF-":
+            logger.warning(f"❌ UPLOAD_FAILED: Magic bytes mismatch for '{file.filename}', Client={client_ip}")
+            raise HTTPException(status_code=400, detail="File content is not a valid PDF")
+
         # Generate unique filename with collision detection
         file_hash = hashlib.md5(file.filename.encode()).hexdigest()
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

@@ -2,22 +2,29 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3005:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://api:8000/api/v1
+      - NEXT_PUBLIC_API_URL=http://localhost/api/v1
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     networks:
       - document-network
 
   api:
     build: ./backend
     ports:
-      - "8005:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DATABASE_URL=postgresql://docuser:docpass@postgres:5432/docprocessor
@@ -35,6 +42,12 @@ services:
       - ./backend:/app
       - ./uploads:/app/uploads
       - /app/__pycache__
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - document-network
 
@@ -62,6 +75,12 @@ services:
       - ./worker:/app/worker
       - ./uploads:/app/uploads
     command: bash -c "cd /app/worker && python worker.py"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import redis, os; r=redis.from_url(os.environ['REDIS_URL']); r.ping()\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     deploy:
       resources:
         limits:
@@ -78,7 +97,7 @@ services:
       - POSTGRES_PASSWORD=docpass
       - POSTGRES_DB=docprocessor
     ports:
-      - "5434:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

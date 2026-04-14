@@ -4,19 +4,19 @@
 
 Your server already has nginx running on port 80. The app will be deployed on alternative ports:
 
-- **Frontend**: http://74.208.184.195:3000
-- **API**: http://74.208.184.195:8000
+- **Frontend**: http://<YOUR_SERVER_IP>:3000
+- **API**: http://<YOUR_SERVER_IP>:8000
 
 ## 📦 **Quick Deployment Steps**
 
 ### 1. Transfer Files
 ```bash
-scp document-processor.tar.gz root@74.208.184.195:/tmp/
+scp document-processor.tar.gz root@<YOUR_SERVER_IP>:/tmp/
 ```
 
 ### 2. Deploy on Server
 ```bash
-ssh root@74.208.184.195
+ssh root@<YOUR_SERVER_IP>
 
 # Create app directory
 mkdir -p /opt/document-processor
@@ -67,8 +67,8 @@ docker-compose restart
 ## 🌐 **Access URLs**
 
 After deployment:
-- **Main App**: http://74.208.184.195:3000
-- **API Docs**: http://74.208.184.195:8000/docs
+- **Main App**: http://<YOUR_SERVER_IP>:3000
+- **API Docs**: http://<YOUR_SERVER_IP>:8000/docs
 
 ## ✅ **Verification**
 
@@ -77,10 +77,10 @@ After deployment:
 docker-compose ps
 
 # Test frontend
-curl http://74.208.184.195:3000
+curl http://<YOUR_SERVER_IP>:3000
 
 # Test API
-curl http://74.208.184.195:8000/health
+curl http://<YOUR_SERVER_IP>:8000/health
 ```
 
 ## 🎨 **What's Deployed**
@@ -105,4 +105,4 @@ location /document-processor/ {
 }
 ```
 
-Then access at: http://74.208.184.195/document-processor/
+Then access at: http://<YOUR_SERVER_IP>/document-processor/

@@ -128,6 +128,20 @@ class DocumentProcessor:
             memory_usage = self._get_memory_usage()
             logger.info(f"📊 MEMORY_BEFORE: {memory_usage}MB, Process={process_id}")
 
+            # Try OpenAI native PDF input (faster, no image conversion)
+            file_size_mb = os.path.getsize(pdf_path) / 1024 / 1024
+            if file_size_mb <= 32:
+                logger.info(f"⚡ NATIVE_PDF_ATTEMPT: {file_size_mb:.1f}MB, Process={process_id}")
+                try:
+                    native_result = await self._process_pdf_native(pdf_path, schema, process_id)
+                    if native_result and native_result.get("success"):
+                        logger.info(f"✅ NATIVE_PDF_SUCCESS: Process={process_id}")
+                        if progress_callback:
+                            progress_callback(1.0)
+                        return native_result
+                except Exception as e:
+                    logger.warning(f"⚠️  NATIVE_PDF_FALLBACK: {e}, falling back to image pipeline, Process={process_id}")
+
             # Get page count with error handling
             try:
                 page_count = self._get_page_count(pdf_path)
@@ -363,9 +377,71 @@ class DocumentProcessor:
             logger.warning(f"⚠️  MEMORY_CHECK_FAILED: {e}")
             return 0.0
 
+    async def _process_pdf_native(
+        self, pdf_path: str, schema: Optional[Dict], process_id: str
+    ) -> Dict[str, Any]:
+        """
+        Fast path: send the PDF directly to GPT-4o using the native PDF input API.
+        Requires OpenAI API that supports file inputs in Chat Completions (gpt-4o).
+
+        Args:
+            pdf_path: Path to PDF file
+            schema: Optional extraction schema
+            process_id: Process identifier for logging
+
+        Returns:
+            Dict with extracted data on success, raises on failure
+        """
+        import io
+        with open(pdf_path, "rb") as f:
+            pdf_bytes = f.read()
+
+        pdf_b64 = base64.b64encode(pdf_bytes).decode("utf-8")
+        prompt = self._build_extraction_prompt(schema)
+
+        response = await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: self.openai_client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "file",
+                                "file": {
+                                    "filename": os.path.basename(pdf_path),
+                                    "file_data": f"data:application/pdf;base64,{pdf_b64}",
+                                },
+                            },
+                        ],
+                    }
+                ],
+                max_tokens=4096,
+                temperature=0.1,
+            ),
+        )
+
+        if not (response and response.choices):
+            raise ValueError("Empty response from OpenAI native PDF API")
+
+        content = response.choices[0].message.content or ""
+        try:
+            extracted = json.loads(content)
+        except json.JSONDecodeError:
+            extracted = {"extracted_text": content}
+
+        return {
+            "success": True,
+            "pages": [extracted],
+            "page_count": 1,
+            "method": "native_pdf",
+        }
+
     def _get_page_count(self, pdf_path: str) -> int:
         """
-        Get page count from PDF with error handling
+        Get page count from PDF efficiently using PyPDF2.
 
         Args:
             pdf_path: Path to PDF file
@@ -377,25 +453,20 @@ class DocumentProcessor:
             Exception: If page count cannot be determined
         """
         try:
-            # Use pdf2image to get page count efficiently
-            from pdf2image.exceptions import PDFInfoNotInstalledError, PDFPageCountError
+            import PyPDF2
 
+            with open(pdf_path, "rb") as f:
+                reader = PyPDF2.PdfReader(f)
+                return len(reader.pages)
+        except Exception:
+            # Fallback: convert only the first page to confirm poppler works, then count
             try:
-                images = convert_from_path(pdf_path, first_page=1, last_page=1)
-                # If we can convert first page, use pdf2image to get total count
+                from pdf2image.exceptions import PDFInfoNotInstalledError
                 info = convert_from_path(pdf_path, dpi=50, fmt="jpeg", thread_count=1)
                 return len(info)
-            except (PDFInfoNotInstalledError, PDFPageCountError):
-                # Fallback to PyPDF2 if pdf2image fails
-                import PyPDF2
-
-                with open(pdf_path, "rb") as file:
-                    pdf_reader = PyPDF2.PdfReader(file)
-                    return len(pdf_reader.pages)
-
-        except Exception as e:
-            logger.error(f"❌ PAGE_COUNT_ERROR: {e} for file {pdf_path}")
-            raise
+            except Exception as e:
+                logger.error(f"❌ PAGE_COUNT_ERROR: {e} for file {pdf_path}")
+                raise
 
     async def _process_page_chunk_with_recovery(
         self,
@@ -617,7 +688,7 @@ class DocumentProcessor:
             response = await asyncio.get_event_loop().run_in_executor(
                 None,
                 lambda: self.openai_client.chat.completions.create(
-                    model="gpt-4-vision-preview",
+                    model="gpt-4o",
                     messages=[
                         {
                             "role": "user",
