@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import {
@@ -65,31 +65,41 @@ export function DocumentList({ templateMode = false, enabled = true, onAuthError
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data, isLoading, refetch } = useQuery<DocumentListResponse>({
+  const { data, isLoading, error, refetch } = useQuery<DocumentListResponse>({
     queryKey: ['documents'],
     queryFn: () => documentApi.list({ limit: 50 }),
     enabled,
-    refetchInterval: enabled ? 5000 : false, // Poll every 5 seconds
-    onError: (error: unknown) => {
-      const apiError = error as ApiError;
+    // Stop polling once all documents are in a terminal state (completed/failed).
+    // Using a function lets React Query decide the interval per-result.
+    refetchInterval: (query) => {
+      if (!enabled) return false;
+      const docs = (query.state.data as DocumentListResponse | undefined)?.documents ?? [];
+      const hasActive = docs.some((d) => d.status === 'pending' || d.status === 'processing');
+      return hasActive ? 5000 : false;
+    },
+    refetchIntervalInBackground: true,
+  });
 
-      if (apiError.status === 401) {
-        onAuthError?.();
-        toast({
-          title: 'Login required',
-          description: 'Sign in with your passcode to see documents.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
+  // React Query v5 removed the onError option from useQuery — handle via useEffect
+  useEffect(() => {
+    if (!error) return;
+    const apiError = error as ApiError;
+    if (apiError.status === 401) {
+      onAuthError?.();
       toast({
-        title: 'Unable to load documents',
-        description: apiError.userMessage || 'Please try again.',
+        title: 'Login required',
+        description: 'Sign in with your passcode to see documents.',
         variant: 'destructive',
       });
-    },
-  });
+      return;
+    }
+    toast({
+      title: 'Unable to load documents',
+      description: (apiError as ApiError).userMessage || 'Please try again.',
+      variant: 'destructive',
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
   const deleteMutation = useMutation({
     mutationFn: documentApi.delete,
