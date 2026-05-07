@@ -1,0 +1,48 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE"
+  },
+  "services": [
+    {
+      "name": "api",
+      "source": { "repo": "this", "rootDirectory": "backend" },
+      "build": { "builder": "DOCKERFILE", "dockerfilePath": "Dockerfile" },
+      "deploy": {
+        "startCommand": "uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-keep-alive 600",
+        "healthcheckPath": "/api/v1/health",
+        "healthcheckTimeout": 30,
+        "restartPolicyType": "ON_FAILURE"
+      }
+    },
+    {
+      "name": "worker",
+      "source": { "repo": "this", "rootDirectory": "backend" },
+      "build": { "builder": "DOCKERFILE", "dockerfilePath": "Dockerfile" },
+      "deploy": {
+        "startCommand": "python worker.py",
+        "restartPolicyType": "ALWAYS"
+      }
+    },
+    {
+      "name": "cron",
+      "source": { "repo": "this", "rootDirectory": "backend" },
+      "build": { "builder": "DOCKERFILE", "dockerfilePath": "Dockerfile" },
+      "deploy": {
+        "startCommand": "python -m app.jobs.cron_enqueue",
+        "cronSchedule": "0 */6 * * *",
+        "restartPolicyType": "NEVER"
+      }
+    },
+    {
+      "name": "web",
+      "source": { "repo": "this", "rootDirectory": "frontend" },
+      "build": { "builder": "DOCKERFILE", "dockerfilePath": "Dockerfile" },
+      "deploy": {
+        "startCommand": "node server.js",
+        "healthcheckPath": "/api/health",
+        "restartPolicyType": "ON_FAILURE"
+      }
+    }
+  ]
+}
